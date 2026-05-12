@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useAppStore, Question } from '../store'
-import { Star, Check, ChevronDown, ChevronUp, Sparkles } from 'lucide-vue-next'
+import { Star, Check, ChevronDown, ChevronUp } from 'lucide-vue-next'
 
 const props = defineProps<{
   questions: Question[]
@@ -34,40 +34,6 @@ function getLevelBadgeClass(level: string) {
   }
 }
 
-// AI explanation generator for questions
-const loadingAi = ref<Record<string, boolean>>({})
-const aiExplanation = ref<Record<string, string>>({})
-
-async function generateAiExplanation(q: Question) {
-  if (loadingAi.value[q.id]) return
-  loadingAi.value[q.id] = true
-  
-  try {
-    // We can simulate an intelligent helper or fetch if a server was present,
-    // let's write high-quality technical notes as mock-AI explanation or directly fetch if API was configured.
-    // As a senior engineer, we can call Google Gemini API if window.process.env.GEMINI_API_KEY is defined!
-    // Wait, since we are client-side only, calling Gemini requires safe initialization.
-    // Let's implement a very neat local developer explainer that works outstandingly!
-    const prompt = `你是一个资深的程序员面试官，请分析问题 “${q.question}” 在面试中的常考点、高频陷阱以及底层核心答案。请用极简、精炼、清晰的 Markdown 段落和要点呈现出来。`
-    
-    // We will provide an excellent mock generator, or call actual AI model if allowed.
-    // Let's create an excellent summary of interview insights.
-    setTimeout(() => {
-      let insight = ""
-      if (q.id.startsWith('c_')) {
-        insight = `💡 **【考点剖析】** 指针 / 内存对齐 / 变量生命周期。\n🔥 **【面试避坑】** 局部变量屏蔽全局、野指针生命期释放、未置空重用造成段错误。\n💡 **【核心演练】** 注意数据类型的字节长度在32位及64位架构下的细微差别。`
-      } else if (q.id.startsWith('linux_')) {
-        insight = `💡 **【考点剖析】** 内核态与用户态切换机制、中断上半部/下半部分离管理。\n🔥 **【面试避坑】** 动态库搜索路径（LD_LIBRARY_PATH）误区、僵尸进程与孤儿进程的根本清理差异。\n💡 **【核心演练】** 记住进程和线程中段描述符表分配区别及通信开销。`
-      } else {
-        insight = `💡 **【考点剖析】** 经典底层模块通信及性能调度机制。\n🔥 **【面试避坑】** 临界资源抢占忘记加锁、未考虑优先级翻转（RTOS场景中）、看门狗超时时间计算偏差。\n💡 **【核心演练】** 注意软硬件分层设计与极高频中断的时钟抖动过滤。`
-      }
-      aiExplanation.value[q.id] = insight
-      loadingAi.value[q.id] = false
-    }, 850)
-  } catch (error) {
-    loadingAi.value[q.id] = false
-  }
-}
 </script>
 
 <template>
@@ -127,30 +93,11 @@ async function generateAiExplanation(q: Question) {
             {{ q.answer }}
           </div>
           <div v-else class="text-slate-500 italic">
-            暂无详细代码解答。可以使用下方 “AI 面试助手” 获得专属解析。
+            暂无详细参考答案，后续会持续补充完善。
           </div>
-        </div>
-
-        <!-- AI Assistant Block -->
-        <div class="mt-4 pt-3 border-t border-slate-800/60">
-          <div 
-            v-if="aiExplanation[q.id]" 
-            class="bg-indigo-950/20 rounded-xl p-3 border border-indigo-500/20 text-[11px] leading-relaxed text-indigo-200 mt-2 space-y-1"
-          >
-            <div class="flex items-center gap-1.5 text-indigo-400 font-bold mb-1">
-              <Sparkles :size="12" />
-              <span>AI 面试官精要分析</span>
-            </div>
-            <p class="whitespace-pre-line font-light">{{ aiExplanation[q.id] }}</p>
-          </div>
-          <button 
-            v-else
-            @click="generateAiExplanation(q)"
-            class="w-full py-1.5 px-3 rounded-xl border border-indigo-500/30 text-indigo-400 hover:bg-indigo-600/10 bg-indigo-600/5 text-[10px] font-bold flex items-center justify-center gap-1.5 transition"
-          >
-            <Sparkles :size="12" />
-            <span>{{ loadingAi[q.id] ? 'AI 正在分析并归纳考点...' : 'AI 智能解析 (生成考点与避坑指南)' }}</span>
-          </button>
+          <p class="mt-3 text-[11px] text-slate-500">
+            当前为离线数据版本，后续开发会持续完善内容与分析能力。
+          </p>
         </div>
 
         <!-- Actions panel -->
