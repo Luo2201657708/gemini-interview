@@ -1,0 +1,6 @@
+{
+  "name": "Remix: Remix: CodeMaster Pro - 程序员面试刷题与复习",
+  "description": "基于 Vue3 + Pinia 架构的移动端程序员面试刷题与复习 H5 Web APP。提供精美 Elegant Dark 主题，包含只读题库、手风琴列表模式、3D 翻转闪卡模式、全局搜索和 Pinia 本地持久化收藏及已掌握状态。",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
