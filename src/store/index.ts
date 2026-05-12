@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import questionBankRaw from '../data.json'
+import questionBankRaw from '../../../output.json'
 
 export interface Question {
   id: string
