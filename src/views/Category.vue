@@ -257,6 +257,12 @@ const viewProgress = computed(() => {
   pointer-events: auto;
 }
 
+@media (min-width: 768px) {
+  .chrome-collapse-shell--pinned {
+    margin-bottom: 0.375rem;
+  }
+}
+
 .chrome-collapse-track {
   transform: translateY(0) scale(1);
   opacity: 1;

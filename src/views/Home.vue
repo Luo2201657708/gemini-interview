@@ -135,7 +135,7 @@ const totalQuestionsCount = computed(() => {
           <span class="text-app-sm-cap text-app-secondary font-mono">总题数: {{ totalQuestionsCount }}</span>
         </div>
 
-        <div class="grid grid-cols-2 gap-3 pb-8">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-3 pb-8">
           <div
             v-for="cat in store.questionBank"
             :key="cat.category"

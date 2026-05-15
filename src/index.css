@@ -235,8 +235,36 @@ html {
   aspect-ratio: 4 / 5;
 }
 
+@media (min-width: 768px) {
+  .flashcard-card {
+    width: min(100%, 26rem);
+    height: auto;
+    max-height: min(100%, 34rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  .flashcard-card {
+    width: min(100%, 22rem);
+    max-height: min(100%, 32rem);
+  }
+}
+
+@media (min-width: 1280px) {
+  .flashcard-card {
+    width: min(100%, 28rem);
+    max-height: min(100%, 36rem);
+  }
+}
+
 .phone-shell-inner {
   padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 768px) {
+  .phone-shell-inner {
+    padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
+  }
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {

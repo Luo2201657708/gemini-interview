@@ -86,9 +86,9 @@ const activeComponentStack = computed(() => {
       <ThemeToggle />
     </div>
 
-    <div class="flex-1 w-full max-w-7xl mx-auto flex lg:flex-row flex-col justify-center items-center lg:p-6 overflow-hidden">
+    <div class="flex-1 w-full max-w-[90rem] mx-auto flex lg:flex-row flex-col justify-stretch items-stretch min-h-0 overflow-hidden md:p-4 lg:gap-5 lg:px-6 lg:py-5">
       
-      <div class="hidden xl:flex xl:w-[260px] flex-col gap-4 p-4 shrink-0 text-left self-stretch justify-center select-none">
+      <div class="hidden xl:flex xl:w-[240px] 2xl:w-[260px] flex-col gap-4 p-3 shrink-0 text-left self-start justify-start select-none pt-2">
         <div class="space-y-1">
           <h3 class="text-sm font-extrabold text-app-heading">架构师复习法</h3>
           <p class="text-[11px] text-app-secondary leading-relaxed font-light">
@@ -113,12 +113,9 @@ const activeComponentStack = computed(() => {
         </div>
       </div>
 
-      <div class="flex-1 w-full flex justify-center items-center overflow-hidden h-full">
-        <div class="relative w-full h-[100dvh] lg:h-[580px] lg:w-[325px] bg-app lg:rounded-[36px] lg:border-[8px] lg:border-app-frame lg:shadow-2xl flex flex-col overflow-hidden">
-          
-          <div class="hidden lg:block h-5 w-28 bg-app-frame absolute top-0 left-1/2 -translate-x-1/2 rounded-b-xl z-35 border-x border-b border-app"></div>
-
-          <div class="phone-shell-inner flex-1 flex flex-col p-4 pt-4 lg:pt-8 bg-app h-full overflow-hidden">
+      <div class="flex-1 w-full min-w-0 flex justify-center items-stretch overflow-hidden h-full min-h-0">
+        <div class="app-shell relative w-full h-[100dvh] md:h-full md:max-h-[100dvh] md:min-h-0 bg-app flex flex-col overflow-hidden md:max-w-2xl md:mx-auto md:rounded-3xl md:border md:border-app md:shadow-2xl lg:mx-0 lg:max-w-xl xl:max-w-2xl lg:w-full lg:max-h-[min(100dvh,52rem)]">
+          <div class="phone-shell-inner flex-1 flex flex-col p-4 pt-4 md:p-5 md:pt-5 lg:p-6 lg:pt-6 bg-app h-full overflow-hidden min-h-0">
             <KeepAlive>
               <HomeView 
                 v-if="currentCategoryName === null"
@@ -135,7 +132,7 @@ const activeComponentStack = computed(() => {
         </div>
       </div>
 
-      <div class="hidden lg:flex w-[265px] flex-col gap-4 p-4 shrink-0 text-left self-stretch justify-center">
+      <div class="hidden lg:flex lg:w-[220px] xl:w-[265px] flex-col gap-4 p-3 xl:p-4 shrink-0 text-left self-start justify-start pt-2">
         <div class="bg-app-panel rounded-2xl border border-app p-4.5">
           <div class="flex items-center gap-1.5 text-app-secondary text-xs font-bold mb-3">
             <Database :size="13" />
@@ -196,7 +193,7 @@ const activeComponentStack = computed(() => {
 
     <div class="hidden lg:flex w-full bg-app border-t border-app-subtle py-2.5 px-6 shrink-0 justify-between items-center text-[10px] text-app-faint font-mono">
       <div>DESIGN: THEME_AWARE_V1</div>
-      <div>RESOLUTION: 320x568 (SIMULATION: IPHONE_SE_PREVIEW)</div>
+      <div>VIEWPORT: RESPONSIVE (MOBILE / TABLET / DESKTOP)</div>
       <div class="flex items-center gap-1">
         <span>Made with</span>
         <Heart class="text-rose-500 hover:scale-110 transition-transform" :size="9" fill="currentColor" />
