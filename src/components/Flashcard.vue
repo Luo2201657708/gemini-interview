@@ -12,9 +12,28 @@ const store = useAppStore()
 const currentIndex = ref(0)
 const isFlipped = ref(false)
 
+const SWIPE_MIN_DELTA = 10
+const SWIPE_AXIS_RATIO = 1.35
+const SWIPE_COMMIT_THRESHOLD = 76
+const SWIPE_DRAG_DAMPING = 0.42
+const SWIPE_COOLDOWN_MS = 380
+const SWIPE_EXIT_MS = 220
+
+const dragOffsetX = ref(0)
+const slideExitX = ref(0)
+const isSwipeActive = ref(false)
+const suppressFlipClick = ref(false)
+
+let touchStartX = 0
+let touchStartY = 0
+let rawDragX = 0
+let gestureAxis: 'horizontal' | 'vertical' | null = null
+let swipeCooldownUntil = 0
+
 watch(() => props.questions, () => {
   currentIndex.value = 0
   isFlipped.value = false
+  resetSwipeState()
 }, { deep: true })
 
 const currentQuestion = computed<Question | null>(() => {
@@ -22,32 +41,155 @@ const currentQuestion = computed<Question | null>(() => {
   return props.questions[currentIndex.value]
 })
 
+const cardMotionStyle = computed(() => {
+  const x = slideExitX.value || dragOffsetX.value
+  if (!x) return undefined
+  return { transform: `translateX(${x}px)` }
+})
+
+const cardMotionClass = computed(() => ({
+  'flashcard-card--dragging': isSwipeActive.value && !!dragOffsetX.value,
+  'flashcard-card--exiting': !!slideExitX.value,
+}))
+
+function resetSwipeState() {
+  dragOffsetX.value = 0
+  slideExitX.value = 0
+  isSwipeActive.value = false
+  gestureAxis = null
+  rawDragX = 0
+}
+
 function handleFlip() {
+  if (suppressFlipClick.value) {
+    suppressFlipClick.value = false
+    return
+  }
   isFlipped.value = !isFlipped.value
 }
 
-function handleNext() {
-  if (props.questions.length === 0) return
-  isFlipped.value = false
-  setTimeout(() => {
+function advanceIndex(direction: 'next' | 'prev') {
+  if (direction === 'next') {
     if (currentIndex.value < props.questions.length - 1) {
       currentIndex.value++
     } else {
       currentIndex.value = 0
     }
-  }, 150)
+  } else if (currentIndex.value > 0) {
+    currentIndex.value--
+  } else {
+    currentIndex.value = props.questions.length - 1
+  }
+}
+
+function navigateBySwipe(direction: 'next' | 'prev') {
+  if (props.questions.length === 0 || Date.now() < swipeCooldownUntil) return
+
+  isFlipped.value = false
+  swipeCooldownUntil = Date.now() + SWIPE_COOLDOWN_MS
+  suppressFlipClick.value = true
+
+  const exitX = direction === 'next' ? -120 : 120
+  slideExitX.value = exitX
+  dragOffsetX.value = 0
+  isSwipeActive.value = false
+
+  window.setTimeout(() => {
+    advanceIndex(direction)
+    slideExitX.value = direction === 'next' ? 96 : -96
+    window.setTimeout(() => {
+      slideExitX.value = 0
+    }, 16)
+  }, SWIPE_EXIT_MS)
+}
+
+function handleNext() {
+  if (props.questions.length === 0 || Date.now() < swipeCooldownUntil) return
+  isFlipped.value = false
+  window.setTimeout(() => advanceIndex('next'), 150)
 }
 
 function handlePrev() {
-  if (props.questions.length === 0) return
+  if (props.questions.length === 0 || Date.now() < swipeCooldownUntil) return
   isFlipped.value = false
-  setTimeout(() => {
-    if (currentIndex.value > 0) {
-      currentIndex.value--
+  window.setTimeout(() => advanceIndex('prev'), 150)
+}
+
+let touchMoveTarget: HTMLElement | null = null
+
+function detachTouchMove() {
+  touchMoveTarget?.removeEventListener('touchmove', onTouchMove)
+  touchMoveTarget = null
+}
+
+function onTouchStart(e: TouchEvent) {
+  if (Date.now() < swipeCooldownUntil || slideExitX.value) return
+
+  const touch = e.touches[0]
+  touchStartX = touch.clientX
+  touchStartY = touch.clientY
+  rawDragX = 0
+  gestureAxis = null
+  dragOffsetX.value = 0
+  isSwipeActive.value = true
+
+  touchMoveTarget = e.currentTarget as HTMLElement
+  touchMoveTarget.addEventListener('touchmove', onTouchMove, { passive: false })
+}
+
+function onTouchMove(e: TouchEvent) {
+  if (!isSwipeActive.value || Date.now() < swipeCooldownUntil || slideExitX.value) return
+
+  const touch = e.touches[0]
+  const dx = touch.clientX - touchStartX
+  const dy = touch.clientY - touchStartY
+
+  if (!gestureAxis) {
+    if (Math.abs(dx) < SWIPE_MIN_DELTA && Math.abs(dy) < SWIPE_MIN_DELTA) return
+
+    if (Math.abs(dx) > Math.abs(dy) * SWIPE_AXIS_RATIO) {
+      gestureAxis = 'horizontal'
+    } else if (Math.abs(dy) > Math.abs(dx) * SWIPE_AXIS_RATIO) {
+      gestureAxis = 'vertical'
+      isSwipeActive.value = false
+      return
     } else {
-      currentIndex.value = props.questions.length - 1
+      return
     }
-  }, 150)
+  }
+
+  if (gestureAxis !== 'horizontal') return
+
+  e.preventDefault()
+  rawDragX = dx
+  dragOffsetX.value = dx * SWIPE_DRAG_DAMPING
+}
+
+function onTouchEnd() {
+  detachTouchMove()
+
+  if (!isSwipeActive.value || gestureAxis !== 'horizontal') {
+    resetSwipeState()
+    return
+  }
+
+  const shouldGoNext = rawDragX <= -SWIPE_COMMIT_THRESHOLD
+  const shouldGoPrev = rawDragX >= SWIPE_COMMIT_THRESHOLD
+
+  if (shouldGoNext) {
+    navigateBySwipe('next')
+    return
+  }
+
+  if (shouldGoPrev) {
+    navigateBySwipe('prev')
+    return
+  }
+
+  dragOffsetX.value = 0
+  isSwipeActive.value = false
+  gestureAxis = null
+  rawDragX = 0
 }
 
 function getLevelBadgeClass(level: string) {
@@ -67,7 +209,12 @@ function getLevelBadgeClass(level: string) {
   <div class="flex flex-col h-full min-h-0 justify-between gap-3 sm:gap-4">
     <div v-if="currentQuestion" class="flashcard-stage flex-1 min-h-0 w-full flex flex-col items-center justify-center px-0.5 py-1 overflow-hidden">
       <div
-        class="flashcard-card perspective-1000 cursor-pointer select-none"
+        class="flashcard-card perspective-1000 cursor-pointer select-none touch-pan-y"
+        :class="cardMotionClass"
+        :style="cardMotionStyle"
+        @touchstart.passive="onTouchStart"
+        @touchend="onTouchEnd"
+        @touchcancel="onTouchEnd"
         @click="handleFlip"
       >
         <div 
@@ -211,6 +358,18 @@ function getLevelBadgeClass(level: string) {
 .card-inner {
   transform-style: preserve-3d;
   transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.flashcard-card {
+  transition: transform 0.28s cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.flashcard-card--dragging {
+  transition: none;
+}
+
+.flashcard-card--exiting {
+  transition: transform 0.22s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .custom-scrollbar::-webkit-scrollbar {

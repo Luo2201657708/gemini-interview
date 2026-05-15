@@ -24,15 +24,18 @@ const scrollContainerRef = ref<HTMLElement | null>(null)
 const showScrollChrome = ref(true)
 const lastScrollTop = ref(0)
 
-const SCROLL_DELTA = 4
-const TOP_SHOW_OFFSET = 20
-const HIDE_ACCUM_THRESHOLD = 56
-const SHOW_ACCUM_THRESHOLD = 28
+const SCROLL_DELTA = 8
+const TOP_SHOW_OFFSET = 24
+const HIDE_ACCUM_THRESHOLD = 88
+const SHOW_ACCUM_THRESHOLD = 48
+const CHROME_TOGGLE_COOLDOWN_MS = 360
 
 const scrollAccum = ref(0)
+let chromeCooldownUntil = 0
 
 function onListScroll() {
   if (studyMode.value !== 'list') return
+  if (Date.now() < chromeCooldownUntil) return
 
   const el = scrollContainerRef.value
   if (!el) return
@@ -40,35 +43,42 @@ function onListScroll() {
   const scrollTop = el.scrollTop
 
   if (scrollTop <= TOP_SHOW_OFFSET) {
-    showScrollChrome.value = true
+    if (!showScrollChrome.value) {
+      showScrollChrome.value = true
+      chromeCooldownUntil = Date.now() + CHROME_TOGGLE_COOLDOWN_MS
+    }
     scrollAccum.value = 0
     lastScrollTop.value = scrollTop
     return
   }
 
   const delta = scrollTop - lastScrollTop.value
+  lastScrollTop.value = scrollTop
   if (Math.abs(delta) < SCROLL_DELTA) return
 
   if (delta > 0) {
-    scrollAccum.value = Math.max(0, scrollAccum.value) + delta
-    if (scrollAccum.value >= HIDE_ACCUM_THRESHOLD) {
+    if (scrollAccum.value < 0) scrollAccum.value = 0
+    scrollAccum.value += delta
+    if (scrollAccum.value >= HIDE_ACCUM_THRESHOLD && showScrollChrome.value) {
       showScrollChrome.value = false
       scrollAccum.value = 0
+      chromeCooldownUntil = Date.now() + CHROME_TOGGLE_COOLDOWN_MS
     }
   } else {
-    scrollAccum.value = Math.min(0, scrollAccum.value) + delta
-    if (scrollAccum.value <= -SHOW_ACCUM_THRESHOLD) {
+    if (scrollAccum.value > 0) scrollAccum.value = 0
+    scrollAccum.value += delta
+    if (scrollAccum.value <= -SHOW_ACCUM_THRESHOLD && !showScrollChrome.value) {
       showScrollChrome.value = true
       scrollAccum.value = 0
+      chromeCooldownUntil = Date.now() + CHROME_TOGGLE_COOLDOWN_MS
     }
   }
-
-  lastScrollTop.value = scrollTop
 }
 
 watch(studyMode, () => {
   showScrollChrome.value = true
   scrollAccum.value = 0
+  chromeCooldownUntil = 0
   lastScrollTop.value = scrollContainerRef.value?.scrollTop ?? 0
 })
 
