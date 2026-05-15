@@ -71,8 +71,8 @@ const percentCompleted = computed(() => {
 <template>
   <div class="flex-1 flex flex-col h-full overflow-hidden">
     <!-- Header Summary Status -->
-    <div class="mb-4">
-      <p class="text-[11px] font-mono text-app-muted uppercase tracking-widest">
+    <div class="mb-4 pr-24 lg:pr-0">
+      <p class="text-app-sm-cap font-mono text-app-muted uppercase tracking-widest">
         CodeMaster Interview Deck
       </p>
       <h2 class="text-xl font-bold text-app-heading tracking-tight flex items-center gap-1.5 mt-0.5">
@@ -118,7 +118,7 @@ const percentCompleted = computed(() => {
               <div class="text-xs font-bold text-app">
                 我的收藏
               </div>
-              <div class="text-[10px] text-app-muted">
+              <div class="text-app-xs text-app-muted">
                 共收藏 {{ store.favorites.length }} 道面试题
               </div>
             </div>
@@ -133,10 +133,10 @@ const percentCompleted = computed(() => {
       <!-- Search results view -->
       <div v-if="searchKeyword" class="space-y-4">
         <div class="flex items-center justify-between px-1">
-          <span class="text-[10px] text-app-muted uppercase tracking-widest font-mono">
+          <span class="text-app-xs text-app-muted uppercase tracking-widest font-mono">
             Search Matches
           </span>
-          <span class="text-[10px] text-app-accent font-mono">
+          <span class="text-app-xs text-app-accent font-mono">
             找到 {{ searchResults.length }} 条结果
           </span>
         </div>
@@ -150,17 +150,17 @@ const percentCompleted = computed(() => {
         <div v-else class="text-center py-12 bg-app-muted rounded-2xl border border-app">
           <BookOpen class="mx-auto text-app-faint mb-2 stroke-[1.5]" :size="32" />
           <p class="text-app-muted text-xs">没有找到与其匹配的题目</p>
-          <p class="text-app-faint text-[10px] mt-1.5">试着输入 “指针”, “内存” 或 “进程” 等核心词汇</p>
+          <p class="text-app-faint text-app-xs mt-1.5">试着输入 “指针”, “内存” 或 “进程” 等核心词汇</p>
         </div>
       </div>
 
       <!-- Standard categories grid -->
       <div v-else class="space-y-5">
         <div class="flex items-center justify-between px-1">
-          <span class="text-[10px] text-app-muted uppercase tracking-widest font-mono">
+          <span class="text-app-xs text-app-muted uppercase tracking-widest font-mono">
             Technical Categories
           </span>
-          <span class="text-[11px] text-app-secondary font-mono">
+          <span class="text-app-sm-cap text-app-secondary font-mono">
             总题数: {{ totalQuestionsCount }}
           </span>
         </div>
@@ -181,7 +181,7 @@ const percentCompleted = computed(() => {
               <!-- Tiny mastery indicator badge -->
               <span 
                 v-if="store.categoryProgress(cat.category).percent === 100"
-                class="bg-green-500/15 text-green-400 border border-green-500/25 text-[8px] px-1.5 py-0.5 rounded-full font-bold uppercase"
+                class="bg-green-500/15 text-green-400 border border-green-500/25 text-app-2xs px-1.5 py-0.5 rounded-full font-bold uppercase"
               >
                 已通关
               </span>
@@ -193,11 +193,11 @@ const percentCompleted = computed(() => {
                 {{ cat.category }}
               </h3>
               <div class="flex items-center gap-1 mt-1">
-                <span class="text-[10px] text-app-muted font-mono">
+                <span class="text-app-xs text-app-muted font-mono">
                   {{ cat.questions.length }} 题
                 </span>
-                <span class="text-[9px] text-app-faint font-mono">•</span>
-                <span class="text-[9px] text-app-secondary font-mono">
+                <span class="text-app-2xs text-app-faint font-mono">•</span>
+                <span class="text-app-2xs text-app-secondary font-mono">
                   已掌握 {{ store.categoryProgress(cat.category).masteredCount }}
                 </span>
               </div>
@@ -223,7 +223,7 @@ const percentCompleted = computed(() => {
             <Award :size="13" />
             <span>面试实力评级</span>
           </div>
-          <p class="text-[10px] text-app-secondary leading-relaxed font-light">
+          <p class="text-app-xs text-app-secondary leading-relaxed font-light">
             已攻克 {{ masteredQuestionsCount }} 道技术难关。
             {{ percentCompleted < 20 ? '仍需继续积累实力。' : percentCompleted < 50 ? '战力正在强力跃升中！' : percentCompleted < 80 ? '资深实力展露无遗！' : '面试通关率爆表！' }}
           </p>

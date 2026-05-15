@@ -5,6 +5,7 @@ import { ArrowLeft, Sliders, LayoutList, BookOpen } from 'lucide-vue-next'
 import QuestionList from '../components/QuestionList.vue'
 import Flashcard from '../components/Flashcard.vue'
 import ThemeToggle from '../components/ThemeToggle.vue'
+import TextScaleToggle from '../components/TextScaleToggle.vue'
 
 const props = defineProps<{
   categoryName: string
@@ -91,7 +92,7 @@ const viewProgress = computed(() => {
           <h3 class="text-sm font-bold text-app-heading tracking-tight truncate">
             {{ props.categoryName }}
           </h3>
-          <div class="flex items-center justify-center gap-1.5 mt-0.5 text-[9px] font-mono text-app-muted">
+          <div class="flex items-center justify-center gap-1.5 mt-0.5 text-app-2xs font-mono text-app-muted">
             <span>攻克度</span>
             <span class="text-app-accent font-bold">
               {{ viewProgress.mastered }}/{{ viewProgress.total }}
@@ -116,7 +117,7 @@ const viewProgress = computed(() => {
           <div class="bg-app-inset p-1 rounded-full flex border border-app shrink-0">
             <button
               @click="studyMode = 'list'"
-              class="px-2.5 py-1 rounded-full text-[9px] font-bold flex items-center gap-1 transition"
+              class="px-2.5 py-1 rounded-full text-app-2xs font-bold flex items-center gap-1 transition"
               :class="[
                 studyMode === 'list'
                   ? 'bg-app-surface-hover text-app-accent font-extrabold shadow'
@@ -128,7 +129,7 @@ const viewProgress = computed(() => {
             </button>
             <button
               @click="studyMode = 'flashcard'"
-              class="px-2.5 py-1 rounded-full text-[9px] font-bold flex items-center gap-1 transition"
+              class="px-2.5 py-1 rounded-full text-app-2xs font-bold flex items-center gap-1 transition"
               :class="[
                 studyMode === 'flashcard'
                   ? 'bg-app-surface-hover text-app-accent font-extrabold shadow'
@@ -140,7 +141,10 @@ const viewProgress = computed(() => {
             </button>
           </div>
 
-          <ThemeToggle />
+          <div class="flex items-center gap-2 shrink-0">
+            <TextScaleToggle />
+            <ThemeToggle />
+          </div>
         </div>
 
         <div class="flex items-center gap-1.5 overflow-x-auto pb-1 pt-2.5 invisible-scrollbar">
@@ -148,7 +152,7 @@ const viewProgress = computed(() => {
             v-for="filter in (['all', '重点', '必问', '了解'] as const)"
             :key="filter"
             @click="activeFilter = filter"
-            class="px-3.5 py-1.5 rounded-xl border text-[11px] font-semibold whitespace-nowrap transition-colors cursor-pointer"
+            class="px-3.5 py-1.5 rounded-xl border text-app-sm-cap font-semibold whitespace-nowrap transition-colors cursor-pointer"
             :class="[
               activeFilter === filter
                 ? 'bg-app-accent-solid border-app-accent text-white font-extrabold shadow-sm'
@@ -182,7 +186,7 @@ const viewProgress = computed(() => {
       <div v-else class="text-center py-20 bg-app-muted rounded-3xl border border-app mt-2 p-6">
         <Sliders class="mx-auto text-app-faint mb-2 stroke-[1.5]" :size="32" />
         <p class="text-app-muted text-xs font-medium">该筛选条件下暂无题目</p>
-        <p class="text-app-faint text-[10px] mt-1.5 leading-relaxed">
+        <p class="text-app-faint text-app-xs mt-1.5 leading-relaxed">
           可以在主页收藏更多题目，或切换筛选过滤器查看。
         </p>
       </div>
@@ -193,7 +197,7 @@ const viewProgress = computed(() => {
 <style scoped>
 .chrome-collapse-shell {
   overflow: hidden;
-  max-height: 6.75rem;
+  max-height: calc(7.5rem * var(--app-scale));
   margin-bottom: 1rem;
   opacity: 1;
   pointer-events: auto;
@@ -211,7 +215,7 @@ const viewProgress = computed(() => {
 }
 
 .chrome-collapse-shell--pinned {
-  max-height: 6.75rem;
+  max-height: calc(7.5rem * var(--app-scale));
   margin-bottom: 1rem;
   opacity: 1;
   pointer-events: auto;

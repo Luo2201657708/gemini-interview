@@ -78,14 +78,14 @@ function getLevelBadgeClass(level: string) {
           <div class="flex items-center gap-2 flex-wrap">
             <span 
               v-if="q.level"
-              class="text-[10px] px-2 py-0.5 rounded-full font-bold border" 
+              class="text-app-xs px-2 py-0.5 rounded-full font-bold border" 
               :class="getLevelBadgeClass(q.level)"
             >
               {{ q.level }}
             </span>
             <span 
               v-if="store.isMastered(q.id)" 
-              class="bg-green-500/10 text-green-400 border border-green-500/20 text-[10px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5 font-bold"
+              class="bg-green-500/10 text-green-400 border border-green-500/20 text-app-xs px-1.5 py-0.5 rounded-full flex items-center gap-0.5 font-bold"
             >
               已掌握
             </span>
@@ -112,19 +112,19 @@ function getLevelBadgeClass(level: string) {
           <div v-else class="text-app-muted italic">
             暂无详细参考答案，后续会持续补充完善。
           </div>
-          <p class="mt-3 text-[11px] text-app-muted">
+          <p class="mt-3 text-app-sm-cap text-app-muted">
             当前为离线数据版本，后续开发会持续完善内容与分析能力。
           </p>
         </div>
 
         <div class="mt-4 pt-3 border-t border-app flex justify-between items-center">
-          <div class="text-[10px] font-mono text-app-muted">
+          <div class="text-app-xs font-mono text-app-muted">
             ID: {{ q.id }}
           </div>
           <div class="flex items-center gap-2">
             <button 
               @click.stop="store.toggleFavorite(q.id)"
-              class="px-2.5 py-1 rounded-xl border text-[11px] font-medium flex items-center gap-1 transition"
+              class="px-2.5 py-1 rounded-xl border text-app-sm-cap font-medium flex items-center gap-1 transition"
               :class="[
                 store.isFavorite(q.id)
                   ? 'border-amber-500/50 hover:bg-amber-500/10 text-amber-400 bg-amber-500/5'
@@ -137,7 +137,7 @@ function getLevelBadgeClass(level: string) {
 
             <button 
               @click.stop="store.toggleMastered(q.id)"
-              class="px-2.5 py-1 rounded-xl border text-[11px] font-semibold flex items-center gap-1 transition"
+              class="px-2.5 py-1 rounded-xl border text-app-sm-cap font-semibold flex items-center gap-1 transition"
               :class="[
                 store.isMastered(q.id)
                   ? 'border-green-500/50 hover:bg-green-500/10 text-green-400 bg-green-500/5'

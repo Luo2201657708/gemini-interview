@@ -5,6 +5,7 @@ import { Terminal, Database, Cpu, Heart, CheckCircle2 } from 'lucide-vue-next'
 import HomeView from './views/Home.vue'
 import CategoryView from './views/Category.vue'
 import ThemeToggle from './components/ThemeToggle.vue'
+import TextScaleToggle from './components/TextScaleToggle.vue'
 
 const store = useAppStore()
 
@@ -71,12 +72,17 @@ const activeComponentStack = computed(() => {
           </div>
           <span class="text-[10px] font-mono font-bold text-app-secondary">14.8 KB</span>
         </div>
+        <TextScaleToggle />
         <ThemeToggle />
       </div>
     </div>
 
-    <!-- MOBILE: theme toggle on home only (category page has its own in toolbar) -->
-    <div v-if="currentCategoryName === null" class="lg:hidden fixed top-3 right-3 z-50">
+    <!-- MOBILE: toggles on home (category page has its own toolbar) -->
+    <div
+      v-if="currentCategoryName === null"
+      class="lg:hidden fixed top-3 right-3 z-50 flex items-center gap-2"
+    >
+      <TextScaleToggle />
       <ThemeToggle />
     </div>
 
@@ -112,7 +118,7 @@ const activeComponentStack = computed(() => {
           
           <div class="hidden lg:block h-5 w-28 bg-app-frame absolute top-0 left-1/2 -translate-x-1/2 rounded-b-xl z-35 border-x border-b border-app"></div>
 
-          <div class="flex-1 flex flex-col p-4 pt-4 lg:pt-8 bg-app h-full overflow-hidden">
+          <div class="phone-shell-inner flex-1 flex flex-col p-4 pt-4 lg:pt-8 bg-app h-full overflow-hidden">
             <KeepAlive>
               <HomeView 
                 v-if="currentCategoryName === null"

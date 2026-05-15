@@ -1,5 +1,39 @@
 @import "tailwindcss";
 
+/* ── Text scale (compact / normal / comfortable) ───────────── */
+:root,
+[data-text-scale="normal"] {
+  --app-scale: 1;
+}
+
+[data-text-scale="compact"] {
+  --app-scale: 0.86;
+}
+
+[data-text-scale="comfortable"] {
+  --app-scale: 1.06;
+}
+
+html {
+  font-size: calc(14px * var(--app-scale));
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+/* rem-based type (scales with html font-size) */
+.text-app-2xs {
+  font-size: 0.5625rem;
+  line-height: 1.35;
+}
+.text-app-xs {
+  font-size: 0.625rem;
+  line-height: 1.4;
+}
+.text-app-sm-cap {
+  font-size: 0.6875rem;
+  line-height: 1.45;
+}
+
 /* ── Theme tokens ───────────────────────────────────────────── */
 :root,
 [data-theme="dark"] {
@@ -166,6 +200,37 @@
 
 .theme-toggle:hover {
   background-color: var(--app-toggle-hover);
+}
+
+.text-scale-toggle {
+  background-color: var(--app-toggle-bg);
+  border-color: var(--app-toggle-border);
+}
+
+.text-scale-toggle__btn {
+  color: var(--app-text-muted);
+}
+
+.text-scale-toggle__btn:hover {
+  color: var(--app-text-secondary);
+}
+
+.text-scale-toggle__btn--active {
+  color: var(--app-accent-text);
+  background-color: var(--app-bg-surface-hover);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.12);
+}
+
+/* Responsive flashcard shell */
+.flashcard-card {
+  width: min(100%, 19.375rem);
+  height: min(calc(70dvh - 11rem), calc(min(100%, 19.375rem) * 1.25));
+  min-height: 11rem;
+  max-height: min(72dvh, 26rem);
+}
+
+.phone-shell-inner {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
