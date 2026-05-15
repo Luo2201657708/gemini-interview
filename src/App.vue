@@ -75,8 +75,8 @@ const activeComponentStack = computed(() => {
       </div>
     </div>
 
-    <!-- MOBILE TOP BAR: theme toggle in top-right -->
-    <div class="lg:hidden fixed top-3 right-3 z-50">
+    <!-- MOBILE: theme toggle on home only (category page has its own in toolbar) -->
+    <div v-if="currentCategoryName === null" class="lg:hidden fixed top-3 right-3 z-50">
       <ThemeToggle />
     </div>
 

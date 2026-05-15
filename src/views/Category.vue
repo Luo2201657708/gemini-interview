@@ -4,6 +4,7 @@ import { useAppStore, Question } from '../store'
 import { ArrowLeft, Sliders, LayoutList, BookOpen } from 'lucide-vue-next'
 import QuestionList from '../components/QuestionList.vue'
 import Flashcard from '../components/Flashcard.vue'
+import ThemeToggle from '../components/ThemeToggle.vue'
 
 const props = defineProps<{
   categoryName: string
@@ -44,15 +45,16 @@ const viewProgress = computed(() => {
 
 <template>
   <div class="flex-1 flex flex-col h-full overflow-hidden select-none">
-    <div class="flex items-center justify-between pb-3 border-b border-app-subtle mb-4">
+    <div class="border-b border-app-subtle mb-4 pb-3">
+      <div class="flex items-center gap-2">
       <button 
         @click="emit('back')"
-        class="w-8 h-8 rounded-full bg-app-surface border border-app flex items-center justify-center text-app-secondary hover:text-app-heading transition-colors cursor-pointer"
+        class="shrink-0 w-8 h-8 rounded-full bg-app-surface border border-app flex items-center justify-center text-app-secondary hover:text-app-heading transition-colors cursor-pointer"
       >
         <ArrowLeft :size="16" />
       </button>
 
-      <div class="text-center flex-1 px-3">
+        <div class="text-center flex-1 min-w-0 px-1">
         <h3 class="text-sm font-bold text-app-heading tracking-tight truncate">
           {{ props.categoryName }}
         </h3>
@@ -63,9 +65,13 @@ const viewProgress = computed(() => {
           </span>
           <span>({{ viewProgress.percent }}%)</span>
         </div>
+        </div>
+
+        <div class="shrink-0 w-8" aria-hidden="true" />
       </div>
 
-      <div class="bg-app-inset p-1 rounded-full flex border border-app">
+      <div class="flex items-center justify-between gap-3 mt-2.5">
+        <div class="bg-app-inset p-1 rounded-full flex border border-app shrink-0">
         <button 
           @click="studyMode = 'list'"
           class="px-2.5 py-1 rounded-full text-[9px] font-bold flex items-center gap-1 transition"
@@ -90,6 +96,9 @@ const viewProgress = computed(() => {
           <BookOpen :size="10" />
           <span>闪卡</span>
         </button>
+        </div>
+
+        <ThemeToggle />
       </div>
     </div>
 
