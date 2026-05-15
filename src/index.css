@@ -224,6 +224,7 @@ html {
 /* Responsive flashcard shell */
 .flashcard-stage {
   max-height: 100%;
+  isolation: isolate;
 }
 
 .flashcard-card {

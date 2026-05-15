@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { useAppStore, Question } from '../store'
 import { Star, Check, ChevronLeft, ChevronRight, RotateCw } from 'lucide-vue-next'
 
@@ -16,13 +16,37 @@ const SWIPE_MIN_DELTA = 10
 const SWIPE_AXIS_RATIO = 1.35
 const SWIPE_COMMIT_THRESHOLD = 76
 const SWIPE_DRAG_DAMPING = 0.42
-const SWIPE_COOLDOWN_MS = 380
-const SWIPE_EXIT_MS = 220
+const SWIPE_COOLDOWN_MS = 420
+const SLIDE_EXIT_MS = 280
+const SLIDE_ENTER_MS = 360
+const SLIDE_EXIT_OFFSET = 118
+const SLIDE_ENTER_OFFSET = 92
+const SLIDE_SCALE_DELTA = 0.05 // scale 1 → ~0.95 at full travel
 
 const dragOffsetX = ref(0)
 const slideExitX = ref(0)
+const slideEnterX = ref(0)
+const slidePhase = ref<'idle' | 'exit' | 'enter'>('idle')
+const slideDirection = ref<'next' | 'prev' | null>(null)
 const isSwipeActive = ref(false)
 const suppressFlipClick = ref(false)
+const prefersReducedMotion = ref(false)
+
+let reducedMotionMql: MediaQueryList | null = null
+
+function syncReducedMotion() {
+  prefersReducedMotion.value = reducedMotionMql?.matches ?? false
+}
+
+onMounted(() => {
+  reducedMotionMql = window.matchMedia('(prefers-reduced-motion: reduce)')
+  syncReducedMotion()
+  reducedMotionMql.addEventListener('change', syncReducedMotion)
+})
+
+onUnmounted(() => {
+  reducedMotionMql?.removeEventListener('change', syncReducedMotion)
+})
 
 let touchStartX = 0
 let touchStartY = 0
@@ -41,20 +65,52 @@ const currentQuestion = computed<Question | null>(() => {
   return props.questions[currentIndex.value]
 })
 
+function slideMotionFromProgress(progress: number) {
+  const p = Math.min(Math.max(progress, 0), 1)
+  return {
+    scale: 1 - p * SLIDE_SCALE_DELTA,
+    opacity: 1 - p,
+  }
+}
+
 const cardMotionStyle = computed(() => {
-  const x = slideExitX.value || dragOffsetX.value
-  if (!x) return undefined
-  return { transform: `translateX(${x}px)` }
+  const x = slideExitX.value || slideEnterX.value || dragOffsetX.value
+  if (!x && slidePhase.value === 'idle') return undefined
+
+  let scale = 1
+  let opacity = 1
+
+  if (slidePhase.value === 'exit') {
+    const progress = Math.min(Math.abs(slideExitX.value) / SLIDE_EXIT_OFFSET, 1)
+    ;({ scale, opacity } = slideMotionFromProgress(progress))
+  } else if (slidePhase.value === 'enter') {
+    const progress = Math.min(Math.abs(slideEnterX.value) / SLIDE_ENTER_OFFSET, 1)
+    ;({ scale, opacity } = slideMotionFromProgress(progress))
+  } else if (dragOffsetX.value) {
+    const progress = Math.min(Math.abs(dragOffsetX.value) / SWIPE_COMMIT_THRESHOLD, 1)
+    scale = 1 - progress * 0.035
+    opacity = 1 - progress * 0.12
+  }
+
+  return {
+    transform: `translateX(${x}px) scale(${scale})`,
+    opacity: String(opacity),
+  }
 })
 
 const cardMotionClass = computed(() => ({
-  'flashcard-card--dragging': isSwipeActive.value && !!dragOffsetX.value,
-  'flashcard-card--exiting': !!slideExitX.value,
+  'flashcard-card--dragging': isSwipeActive.value && !!dragOffsetX.value && slidePhase.value === 'idle',
+  'flashcard-card--exiting': slidePhase.value === 'exit',
+  'flashcard-card--entering': slidePhase.value === 'enter',
+  'flashcard-card--reduced-motion': prefersReducedMotion.value,
 }))
 
 function resetSwipeState() {
   dragOffsetX.value = 0
   slideExitX.value = 0
+  slideEnterX.value = 0
+  slidePhase.value = 'idle'
+  slideDirection.value = null
   isSwipeActive.value = false
   gestureAxis = null
   rawDragX = 0
@@ -82,37 +138,62 @@ function advanceIndex(direction: 'next' | 'prev') {
   }
 }
 
-function navigateBySwipe(direction: 'next' | 'prev') {
+function navigateAnimated(direction: 'next' | 'prev', fromSwipe = false) {
   if (props.questions.length === 0 || Date.now() < swipeCooldownUntil) return
+  if (slidePhase.value !== 'idle') return
 
   isFlipped.value = false
   swipeCooldownUntil = Date.now() + SWIPE_COOLDOWN_MS
-  suppressFlipClick.value = true
+  if (fromSwipe) suppressFlipClick.value = true
 
-  const exitX = direction === 'next' ? -120 : 120
-  slideExitX.value = exitX
+  if (prefersReducedMotion.value) {
+    advanceIndex(direction)
+    resetSwipeState()
+    return
+  }
+
+  slideDirection.value = direction
+  slidePhase.value = 'exit'
   dragOffsetX.value = 0
   isSwipeActive.value = false
 
+  const exitX = direction === 'next' ? -SLIDE_EXIT_OFFSET : SLIDE_EXIT_OFFSET
+  slideExitX.value = 0
+  slideEnterX.value = 0
+
+  requestAnimationFrame(() => {
+    slideExitX.value = exitX
+  })
+
   window.setTimeout(() => {
     advanceIndex(direction)
-    slideExitX.value = direction === 'next' ? 96 : -96
+    slideExitX.value = 0
+    slidePhase.value = 'enter'
+    slideEnterX.value = direction === 'next' ? SLIDE_ENTER_OFFSET : -SLIDE_ENTER_OFFSET
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        slideEnterX.value = 0
+      })
+    })
+
     window.setTimeout(() => {
-      slideExitX.value = 0
-    }, 16)
-  }, SWIPE_EXIT_MS)
+      slidePhase.value = 'idle'
+      slideDirection.value = null
+    }, SLIDE_ENTER_MS)
+  }, SLIDE_EXIT_MS)
+}
+
+function navigateBySwipe(direction: 'next' | 'prev') {
+  navigateAnimated(direction, true)
 }
 
 function handleNext() {
-  if (props.questions.length === 0 || Date.now() < swipeCooldownUntil) return
-  isFlipped.value = false
-  window.setTimeout(() => advanceIndex('next'), 150)
+  navigateAnimated('next')
 }
 
 function handlePrev() {
-  if (props.questions.length === 0 || Date.now() < swipeCooldownUntil) return
-  isFlipped.value = false
-  window.setTimeout(() => advanceIndex('prev'), 150)
+  navigateAnimated('prev')
 }
 
 let touchMoveTarget: HTMLElement | null = null
@@ -123,7 +204,7 @@ function detachTouchMove() {
 }
 
 function onTouchStart(e: TouchEvent) {
-  if (Date.now() < swipeCooldownUntil || slideExitX.value) return
+  if (Date.now() < swipeCooldownUntil || slidePhase.value !== 'idle') return
 
   const touch = e.touches[0]
   touchStartX = touch.clientX
@@ -138,7 +219,7 @@ function onTouchStart(e: TouchEvent) {
 }
 
 function onTouchMove(e: TouchEvent) {
-  if (!isSwipeActive.value || Date.now() < swipeCooldownUntil || slideExitX.value) return
+  if (!isSwipeActive.value || Date.now() < swipeCooldownUntil || slidePhase.value !== 'idle') return
 
   const touch = e.touches[0]
   const dx = touch.clientX - touchStartX
@@ -361,7 +442,10 @@ function getLevelBadgeClass(level: string) {
 }
 
 .flashcard-card {
-  transition: transform 0.28s cubic-bezier(0.33, 1, 0.68, 1);
+  will-change: transform, opacity;
+  transition:
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .flashcard-card--dragging {
@@ -369,7 +453,25 @@ function getLevelBadgeClass(level: string) {
 }
 
 .flashcard-card--exiting {
-  transition: transform 0.22s cubic-bezier(0.32, 0.72, 0, 1);
+  transition:
+    transform 0.28s cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 0.24s cubic-bezier(0.4, 0, 1, 1);
+}
+
+.flashcard-card--entering {
+  transition:
+    transform 0.36s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.32s cubic-bezier(0, 0, 0.2, 1);
+}
+
+.flashcard-card--reduced-motion {
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flashcard-card {
+    transition: none !important;
+  }
 }
 
 .custom-scrollbar::-webkit-scrollbar {
