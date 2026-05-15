@@ -65,9 +65,9 @@ function getLevelBadgeClass(level: string) {
 
 <template>
   <div class="flex flex-col h-full min-h-0 justify-between gap-3 sm:gap-4">
-    <div v-if="currentQuestion" class="flex-1 min-h-0 w-full flex flex-col items-center justify-center px-0.5">
+    <div v-if="currentQuestion" class="flashcard-stage flex-1 min-h-0 w-full flex flex-col items-center justify-center px-0.5 py-1 overflow-hidden">
       <div
-        class="flashcard-card perspective-1000 cursor-pointer select-none shrink-0"
+        class="flashcard-card perspective-1000 cursor-pointer select-none"
         @click="handleFlip"
       >
         <div 
@@ -122,8 +122,8 @@ function getLevelBadgeClass(level: string) {
               </span>
             </div>
 
-            <div class="flex-1 min-h-0 my-2 sm:my-3 overflow-y-auto pr-1 text-left custom-scrollbar" @click.stop>
-              <p class="text-app-secondary text-app-xs sm:text-xs leading-relaxed whitespace-pre-line antialiased">
+            <div class="flex-1 min-h-0 my-2 sm:my-3 overflow-y-auto px-1 custom-scrollbar flex flex-col items-center justify-center" @click.stop>
+              <p class="text-app-secondary text-app-xs sm:text-xs leading-relaxed whitespace-pre-line antialiased w-full text-center">
                 {{ currentQuestion.answer || '暂无详细文字回答，可以开启手风琴模式下的 AI 解析模块获得详细解说！' }}
               </p>
             </div>

@@ -106,7 +106,7 @@ const viewProgress = computed(() => {
     </div>
 
     <div
-      class="chrome-collapse-shell"
+      class="chrome-collapse-shell shrink-0"
       :class="{
         'chrome-collapse-shell--hidden': studyMode === 'list' && !showScrollChrome,
         'chrome-collapse-shell--pinned': studyMode === 'flashcard',
@@ -167,10 +167,11 @@ const viewProgress = computed(() => {
 
     <div
       ref="scrollContainerRef"
-      class="flex-1 overflow-y-auto pr-1 select-none custom-scrollbar list-scroll-container"
+      class="flex-1 min-h-0 pr-1 select-none custom-scrollbar list-scroll-container"
+      :class="studyMode === 'list' ? 'overflow-y-auto' : 'overflow-hidden pt-1'"
       @scroll="onListScroll"
     >
-      <div v-if="filteredQuestions.length > 0" class="h-full">
+      <div v-if="filteredQuestions.length > 0" class="h-full min-h-0">
         <QuestionList
           v-if="studyMode === 'list'"
           :questions="filteredQuestions"
@@ -215,8 +216,9 @@ const viewProgress = computed(() => {
 }
 
 .chrome-collapse-shell--pinned {
-  max-height: calc(7.5rem * var(--app-scale));
-  margin-bottom: 1rem;
+  max-height: none;
+  overflow: visible;
+  margin-bottom: 0.5rem;
   opacity: 1;
   pointer-events: auto;
 }
