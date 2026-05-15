@@ -118,7 +118,7 @@ const viewProgress = computed(() => {
       </button>
     </div>
 
-    <div class="flex-1 overflow-y-auto pr-1 select-none custom-scrollbar">
+    <div class="flex-1 overflow-y-auto pr-1 select-none custom-scrollbar list-scroll-container">
       <div v-if="filteredQuestions.length > 0" class="h-full">
         <QuestionList 
           v-if="studyMode === 'list'"
@@ -144,6 +144,10 @@ const viewProgress = computed(() => {
 </template>
 
 <style scoped>
+.list-scroll-container {
+  overflow-anchor: none;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 4px;
 }

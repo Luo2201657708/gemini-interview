@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import { useAppStore, Question } from '../store'
 import { Star, Check, ChevronDown, ChevronUp } from 'lucide-vue-next'
 
@@ -11,8 +11,36 @@ defineProps<{
 const store = useAppStore()
 const expandedId = ref<string | null>(null)
 
-function toggleExpand(id: string) {
+function getScrollParent(el: HTMLElement | null): HTMLElement | null {
+  let node = el?.parentElement ?? null
+  while (node) {
+    const { overflowY } = window.getComputedStyle(node)
+    if (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay') {
+      return node
+    }
+    node = node.parentElement
+  }
+  return null
+}
+
+async function toggleExpand(id: string) {
+  const row = document.getElementById(`q-row-${id}`)
+  const anchor = row?.querySelector<HTMLElement>('[data-question-header]')
+  const scrollParent = getScrollParent(row ?? null)
+  const topBefore = anchor?.getBoundingClientRect().top
+
   expandedId.value = expandedId.value === id ? null : id
+
+  if (!anchor || topBefore === undefined) return
+
+  await nextTick()
+  requestAnimationFrame(() => {
+    const topAfter = anchor.getBoundingClientRect().top
+    const delta = topAfter - topBefore
+    if (scrollParent && Math.abs(delta) > 0.5) {
+      scrollParent.scrollTop += delta
+    }
+  })
 }
 
 function getLevelBadgeClass(level: string) {
@@ -42,6 +70,7 @@ function getLevelBadgeClass(level: string) {
       ]"
     >
       <div 
+        data-question-header
         class="p-4 flex items-center justify-between gap-3 cursor-pointer select-none"
         @click="toggleExpand(q.id)"
       >
