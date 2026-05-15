@@ -1,15 +1,46 @@
 <script setup lang="ts">
-import { ref, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useAppStore, Question } from '../store'
 import { Star, Check, ChevronDown, ChevronUp } from 'lucide-vue-next'
 
-defineProps<{
+const props = defineProps<{
   questions: Question[]
   categoryName: string
 }>()
 
 const store = useAppStore()
 const expandedId = ref<string | null>(null)
+const isMultiColumn = ref(false)
+
+const WIDE_MQ = '(min-width: 768px)'
+let wideMql: MediaQueryList | null = null
+
+function onWideViewportChange(e: MediaQueryListEvent) {
+  isMultiColumn.value = e.matches
+}
+
+onMounted(() => {
+  wideMql = window.matchMedia(WIDE_MQ)
+  isMultiColumn.value = wideMql.matches
+  wideMql.addEventListener('change', onWideViewportChange)
+})
+
+onUnmounted(() => {
+  wideMql?.removeEventListener('change', onWideViewportChange)
+})
+
+/** Tablet/desktop: two independent columns so expanding one card does not stretch neighbors. */
+const questionColumns = computed(() => {
+  const qs = props.questions
+  if (!isMultiColumn.value) return [qs]
+  const left: Question[] = []
+  const right: Question[] = []
+  qs.forEach((q, i) => {
+    if (i % 2 === 0) left.push(q)
+    else right.push(q)
+  })
+  return [left, right]
+})
 
 function getScrollParent(el: HTMLElement | null): HTMLElement | null {
   let node = el?.parentElement ?? null
@@ -26,13 +57,15 @@ function getScrollParent(el: HTMLElement | null): HTMLElement | null {
 async function toggleExpand(id: string) {
   const row = document.getElementById(`q-row-${id}`)
   const anchor = row?.querySelector<HTMLElement>('[data-question-header]')
+  const shouldCollapse = expandedId.value === id
+  const topBefore =
+    !isMultiColumn.value && anchor ? anchor.getBoundingClientRect().top : undefined
+
+  expandedId.value = shouldCollapse ? null : id
+
+  if (isMultiColumn.value || topBefore === undefined || !anchor) return
+
   const scrollParent = getScrollParent(row ?? null)
-  const topBefore = anchor?.getBoundingClientRect().top
-
-  expandedId.value = expandedId.value === id ? null : id
-
-  if (!anchor || topBefore === undefined) return
-
   await nextTick()
   requestAnimationFrame(() => {
     const topAfter = anchor.getBoundingClientRect().top
@@ -57,99 +90,115 @@ function getLevelBadgeClass(level: string) {
 </script>
 
 <template>
-  <div class="space-y-3 pb-8 xl:grid xl:grid-cols-2 xl:gap-4 xl:space-y-0">
-    <div 
-      v-for="q in questions" 
-      :key="q.id"
-      :id="'q-row-' + q.id"
-      class="bg-app-muted rounded-2xl border transition-all duration-200"
-      :class="[
-        expandedId === q.id 
-          ? 'border-app-accent shadow-xl shadow-app-accent bg-app-surface' 
-          : 'border-app hover:border-app-strong hover:bg-app-surface'
-      ]"
+  <div
+    class="pb-8"
+    :class="isMultiColumn ? 'flex items-start gap-4' : 'space-y-3'"
+  >
+    <div
+      v-for="(column, colIndex) in questionColumns"
+      :key="colIndex"
+      class="space-y-3 min-w-0"
+      :class="isMultiColumn ? 'flex-1' : ''"
     >
-      <div 
-        data-question-header
-        class="p-4 flex items-center justify-between gap-3 cursor-pointer select-none"
-        @click="toggleExpand(q.id)"
+      <div
+        v-for="q in column"
+        :key="q.id"
+        :id="'q-row-' + q.id"
+        class="question-card bg-app-muted rounded-2xl border transition-[border-color,box-shadow,background-color] duration-200"
+        :class="[
+          expandedId === q.id
+            ? 'border-app-accent shadow-xl shadow-app-accent bg-app-surface'
+            : 'border-app hover:border-app-strong hover:bg-app-surface',
+        ]"
       >
-        <div class="flex-1 flex flex-col gap-1">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span 
-              v-if="q.level"
-              class="text-app-xs px-2 py-0.5 rounded-full font-bold border" 
-              :class="getLevelBadgeClass(q.level)"
-            >
-              {{ q.level }}
-            </span>
-            <span 
-              v-if="store.isMastered(q.id)" 
-              class="bg-green-500/10 text-green-400 border border-green-500/20 text-app-xs px-1.5 py-0.5 rounded-full flex items-center gap-0.5 font-bold"
-            >
-              已掌握
-            </span>
+        <div
+          data-question-header
+          class="p-4 flex items-center justify-between gap-3 cursor-pointer select-none"
+          @click="toggleExpand(q.id)"
+        >
+          <div class="flex-1 flex flex-col gap-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span
+                v-if="q.level"
+                class="text-app-xs px-2 py-0.5 rounded-full font-bold border"
+                :class="getLevelBadgeClass(q.level)"
+              >
+                {{ q.level }}
+              </span>
+              <span
+                v-if="store.isMastered(q.id)"
+                class="bg-green-500/10 text-green-400 border border-green-500/20 text-app-xs px-1.5 py-0.5 rounded-full flex items-center gap-0.5 font-bold"
+              >
+                已掌握
+              </span>
+            </div>
+            <h4 class="text-sm font-medium text-app leading-snug mt-1">
+              {{ q.question }}
+            </h4>
           </div>
-          <h4 class="text-sm font-medium text-app leading-snug mt-1">
-            {{ q.question }}
-          </h4>
-        </div>
-        
-        <div class="text-app-muted">
-          <ChevronUp v-if="expandedId === q.id" :size="18" />
-          <ChevronDown v-else :size="18" />
-        </div>
-      </div>
 
-      <div 
-        v-if="expandedId === q.id" 
-        class="border-t border-app p-4 bg-app-inset/40 rounded-b-2xl transition-all"
-      >
-        <div class="text-app-secondary text-xs leading-relaxed whitespace-pre-line font-light">
-          <div v-if="q.answer">
-            {{ q.answer }}
+          <div class="text-app-muted shrink-0">
+            <ChevronUp v-if="expandedId === q.id" :size="18" />
+            <ChevronDown v-else :size="18" />
           </div>
-          <div v-else class="text-app-muted italic">
-            暂无详细参考答案，后续会持续补充完善。
-          </div>
-          <p class="mt-3 text-app-sm-cap text-app-muted">
-            当前为离线数据版本，后续开发会持续完善内容与分析能力。
-          </p>
         </div>
 
-        <div class="mt-4 pt-3 border-t border-app flex justify-between items-center">
-          <div class="text-app-xs font-mono text-app-muted">
-            ID: {{ q.id }}
+        <div
+          v-show="expandedId === q.id"
+          class="border-t border-app p-4 bg-app-inset/40 rounded-b-2xl"
+        >
+          <div class="text-app-secondary text-xs leading-relaxed whitespace-pre-line font-light">
+            <div v-if="q.answer">
+              {{ q.answer }}
+            </div>
+            <div v-else class="text-app-muted italic">
+              暂无详细参考答案，后续会持续补充完善。
+            </div>
+            <p class="mt-3 text-app-sm-cap text-app-muted">
+              当前为离线数据版本，后续开发会持续完善内容与分析能力。
+            </p>
           </div>
-          <div class="flex items-center gap-2">
-            <button 
-              @click.stop="store.toggleFavorite(q.id)"
-              class="px-2.5 py-1 rounded-xl border text-app-sm-cap font-medium flex items-center gap-1 transition"
-              :class="[
-                store.isFavorite(q.id)
-                  ? 'border-amber-500/50 hover:bg-amber-500/10 text-amber-400 bg-amber-500/5'
-                  : 'border-app text-app-secondary hover:border-app-strong hover:bg-app-surface-hover'
-              ]"
-            >
-              <Star :size="12" :fill="store.isFavorite(q.id) ? 'currentColor' : 'none'" />
-              <span>{{ store.isFavorite(q.id) ? '已收藏' : '收藏' }}</span>
-            </button>
 
-            <button 
-              @click.stop="store.toggleMastered(q.id)"
-              class="px-2.5 py-1 rounded-xl border text-app-sm-cap font-semibold flex items-center gap-1 transition"
-              :class="[
-                store.isMastered(q.id)
-                  ? 'border-green-500/50 hover:bg-green-500/10 text-green-400 bg-green-500/5'
-                  : 'border-app text-app-secondary hover:border-app-strong hover:bg-app-surface-hover'
-              ]"
-            >
-              <Check :size="12" class="stroke-[3]" />
-              <span>{{ store.isMastered(q.id) ? '已掌握' : '标为掌握' }}</span>
-            </button>
+          <div class="mt-4 pt-3 border-t border-app flex justify-between items-center">
+            <div class="text-app-xs font-mono text-app-muted">
+              ID: {{ q.id }}
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                @click.stop="store.toggleFavorite(q.id)"
+                class="px-2.5 py-1 rounded-xl border text-app-sm-cap font-medium flex items-center gap-1 transition"
+                :class="[
+                  store.isFavorite(q.id)
+                    ? 'border-amber-500/50 hover:bg-amber-500/10 text-amber-400 bg-amber-500/5'
+                    : 'border-app text-app-secondary hover:border-app-strong hover:bg-app-surface-hover',
+                ]"
+              >
+                <Star :size="12" :fill="store.isFavorite(q.id) ? 'currentColor' : 'none'" />
+                <span>{{ store.isFavorite(q.id) ? '已收藏' : '收藏' }}</span>
+              </button>
+
+              <button
+                @click.stop="store.toggleMastered(q.id)"
+                class="px-2.5 py-1 rounded-xl border text-app-sm-cap font-semibold flex items-center gap-1 transition"
+                :class="[
+                  store.isMastered(q.id)
+                    ? 'border-green-500/50 hover:bg-green-500/10 text-green-400 bg-green-500/5'
+                    : 'border-app text-app-secondary hover:border-app-strong hover:bg-app-surface-hover',
+                ]"
+              >
+                <Check :size="12" class="stroke-[3]" />
+                <span>{{ store.isMastered(q.id) ? '已掌握' : '标为掌握' }}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+.question-card {
+  contain: layout style;
+}
+</style>
