@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useAppStore, Question } from '../store'
 import { ArrowLeft, Sliders, LayoutList, BookOpen } from 'lucide-vue-next'
 import QuestionList from '../components/QuestionList.vue'
@@ -18,6 +18,39 @@ const store = useAppStore()
 
 const activeFilter = ref<'all' | '重点' | '必问' | '了解'>('all')
 const studyMode = ref<'list' | 'flashcard'>('list')
+
+const scrollContainerRef = ref<HTMLElement | null>(null)
+const showScrollChrome = ref(true)
+const lastScrollTop = ref(0)
+
+const SCROLL_DELTA = 6
+const TOP_SHOW_OFFSET = 16
+
+function onListScroll() {
+  if (studyMode.value !== 'list') return
+
+  const el = scrollContainerRef.value
+  if (!el) return
+
+  const scrollTop = el.scrollTop
+
+  if (scrollTop <= TOP_SHOW_OFFSET) {
+    showScrollChrome.value = true
+    lastScrollTop.value = scrollTop
+    return
+  }
+
+  const delta = scrollTop - lastScrollTop.value
+  if (Math.abs(delta) < SCROLL_DELTA) return
+
+  showScrollChrome.value = delta < 0
+  lastScrollTop.value = scrollTop
+}
+
+watch(studyMode, () => {
+  showScrollChrome.value = true
+  lastScrollTop.value = scrollContainerRef.value?.scrollTop ?? 0
+})
 
 const baseQuestions = computed<Question[]>(() => {
   if (props.categoryName === '我的收藏') {
@@ -45,87 +78,101 @@ const viewProgress = computed(() => {
 
 <template>
   <div class="flex-1 flex flex-col h-full overflow-hidden select-none">
-    <div class="border-b border-app-subtle mb-4 pb-3">
+    <div class="border-b border-app-subtle mb-3 pb-3 shrink-0">
       <div class="flex items-center gap-2">
-      <button 
-        @click="emit('back')"
-        class="shrink-0 w-8 h-8 rounded-full bg-app-surface border border-app flex items-center justify-center text-app-secondary hover:text-app-heading transition-colors cursor-pointer"
-      >
-        <ArrowLeft :size="16" />
-      </button>
+        <button
+          @click="emit('back')"
+          class="shrink-0 w-8 h-8 rounded-full bg-app-surface border border-app flex items-center justify-center text-app-secondary hover:text-app-heading transition-colors cursor-pointer"
+        >
+          <ArrowLeft :size="16" />
+        </button>
 
         <div class="text-center flex-1 min-w-0 px-1">
-        <h3 class="text-sm font-bold text-app-heading tracking-tight truncate">
-          {{ props.categoryName }}
-        </h3>
-        <div class="flex items-center justify-center gap-1.5 mt-0.5 text-[9px] font-mono text-app-muted">
-          <span>攻克度</span>
-          <span class="text-app-accent font-bold">
-            {{ viewProgress.mastered }}/{{ viewProgress.total }}
-          </span>
-          <span>({{ viewProgress.percent }}%)</span>
-        </div>
+          <h3 class="text-sm font-bold text-app-heading tracking-tight truncate">
+            {{ props.categoryName }}
+          </h3>
+          <div class="flex items-center justify-center gap-1.5 mt-0.5 text-[9px] font-mono text-app-muted">
+            <span>攻克度</span>
+            <span class="text-app-accent font-bold">
+              {{ viewProgress.mastered }}/{{ viewProgress.total }}
+            </span>
+            <span>({{ viewProgress.percent }}%)</span>
+          </div>
         </div>
 
         <div class="shrink-0 w-8" aria-hidden="true" />
       </div>
+    </div>
 
-      <div class="flex items-center justify-between gap-3 mt-2.5">
-        <div class="bg-app-inset p-1 rounded-full flex border border-app shrink-0">
-        <button 
-          @click="studyMode = 'list'"
-          class="px-2.5 py-1 rounded-full text-[9px] font-bold flex items-center gap-1 transition"
-          :class="[
-            studyMode === 'list'
-              ? 'bg-app-surface-hover text-app-accent font-extrabold shadow'
-              : 'text-app-muted hover:text-app-secondary'
-          ]"
-        >
-          <LayoutList :size="10" />
-          <span>列表</span>
-        </button>
-        <button 
-          @click="studyMode = 'flashcard'"
-          class="px-2.5 py-1 rounded-full text-[9px] font-bold flex items-center gap-1 transition"
-          :class="[
-            studyMode === 'flashcard'
-              ? 'bg-app-surface-hover text-app-accent font-extrabold shadow'
-              : 'text-app-muted hover:text-app-secondary'
-          ]"
-        >
-          <BookOpen :size="10" />
-          <span>闪卡</span>
-        </button>
+    <div
+      class="chrome-collapse-shell"
+      :class="{
+        'chrome-collapse-shell--hidden': studyMode === 'list' && !showScrollChrome,
+        'chrome-collapse-shell--pinned': studyMode === 'flashcard',
+      }"
+    >
+      <div class="chrome-collapse-track">
+        <div class="flex items-center justify-between gap-3">
+          <div class="bg-app-inset p-1 rounded-full flex border border-app shrink-0">
+            <button
+              @click="studyMode = 'list'"
+              class="px-2.5 py-1 rounded-full text-[9px] font-bold flex items-center gap-1 transition"
+              :class="[
+                studyMode === 'list'
+                  ? 'bg-app-surface-hover text-app-accent font-extrabold shadow'
+                  : 'text-app-muted hover:text-app-secondary',
+              ]"
+            >
+              <LayoutList :size="10" />
+              <span>列表</span>
+            </button>
+            <button
+              @click="studyMode = 'flashcard'"
+              class="px-2.5 py-1 rounded-full text-[9px] font-bold flex items-center gap-1 transition"
+              :class="[
+                studyMode === 'flashcard'
+                  ? 'bg-app-surface-hover text-app-accent font-extrabold shadow'
+                  : 'text-app-muted hover:text-app-secondary',
+              ]"
+            >
+              <BookOpen :size="10" />
+              <span>闪卡</span>
+            </button>
+          </div>
+
+          <ThemeToggle />
         </div>
 
-        <ThemeToggle />
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 pt-2.5 invisible-scrollbar">
+          <button
+            v-for="filter in (['all', '重点', '必问', '了解'] as const)"
+            :key="filter"
+            @click="activeFilter = filter"
+            class="px-3.5 py-1.5 rounded-xl border text-[11px] font-semibold whitespace-nowrap transition-colors cursor-pointer"
+            :class="[
+              activeFilter === filter
+                ? 'bg-app-accent-solid border-app-accent text-white font-extrabold shadow-sm'
+                : 'bg-app-surface border-app text-app-secondary hover:text-app hover:border-app-strong',
+            ]"
+          >
+            {{ filter === 'all' ? '全部' : filter }}
+          </button>
+        </div>
       </div>
     </div>
 
-    <div class="mb-4 flex items-center gap-1.5 overflow-x-auto pb-1 invisible-scrollbar">
-      <button 
-        v-for="filter in (['all', '重点', '必问', '了解'] as const)"
-        :key="filter"
-        @click="activeFilter = filter"
-        class="px-3.5 py-1.5 rounded-xl border text-[11px] font-semibold whitespace-nowrap transition-colors cursor-pointer"
-        :class="[
-          activeFilter === filter 
-            ? 'bg-app-accent-solid border-app-accent text-white font-extrabold shadow-sm' 
-            : 'bg-app-surface border-app text-app-secondary hover:text-app hover:border-app-strong'
-        ]"
-      >
-        {{ filter === 'all' ? '全部' : filter }}
-      </button>
-    </div>
-
-    <div class="flex-1 overflow-y-auto pr-1 select-none custom-scrollbar list-scroll-container">
+    <div
+      ref="scrollContainerRef"
+      class="flex-1 overflow-y-auto pr-1 select-none custom-scrollbar list-scroll-container"
+      @scroll="onListScroll"
+    >
       <div v-if="filteredQuestions.length > 0" class="h-full">
-        <QuestionList 
+        <QuestionList
           v-if="studyMode === 'list'"
           :questions="filteredQuestions"
           :categoryName="props.categoryName"
         />
-        <Flashcard 
+        <Flashcard
           v-else
           :questions="filteredQuestions"
           :categoryName="props.categoryName"
@@ -144,6 +191,41 @@ const viewProgress = computed(() => {
 </template>
 
 <style scoped>
+.chrome-collapse-shell {
+  overflow: hidden;
+  max-height: 6.75rem;
+  margin-bottom: 1rem;
+  opacity: 1;
+  pointer-events: auto;
+  transition:
+    max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    margin-bottom 0.32s cubic-bezier(0.4, 0, 0.2, 1),
+    opacity 0.24s ease;
+}
+
+.chrome-collapse-shell--hidden {
+  max-height: 0;
+  margin-bottom: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.chrome-collapse-shell--pinned {
+  max-height: 6.75rem;
+  margin-bottom: 1rem;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.chrome-collapse-track {
+  transform: translateY(0);
+  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chrome-collapse-shell--hidden .chrome-collapse-track {
+  transform: translateY(-100%);
+}
+
 .list-scroll-container {
   overflow-anchor: none;
 }
