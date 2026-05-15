@@ -1,15 +1,29 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { Type } from 'lucide-vue-next'
-import { useTextScale, type TextScaleId, TEXT_SCALE_LABELS } from '../composables/useTextScale'
+import {
+  useTextScale,
+  type TextScaleId,
+  TEXT_SCALE_LABELS,
+  TEXT_SCALE_SHORTS,
+} from '../composables/useTextScale'
 
-const { textScale, setTextScale } = useTextScale()
+const {
+  textScale,
+  isWideViewport,
+  setTextScale,
+  MOBILE_SCALE_OPTIONS,
+  DESKTOP_SCALE_OPTIONS,
+  isScaleOptionActive,
+} = useTextScale()
 
-const options: { id: TextScaleId; short: string }[] = [
-  { id: 'compact', short: '小' },
-  { id: 'normal', short: '中' },
-  { id: 'comfortable', short: '大' },
-]
+const options = computed(() => {
+  const ids = isWideViewport.value ? DESKTOP_SCALE_OPTIONS : MOBILE_SCALE_OPTIONS
+  return ids.map((id: TextScaleId) => ({
+    id,
+    short: TEXT_SCALE_SHORTS[id],
+  }))
+})
 
 const groupLabel = computed(
   () => `字号：${TEXT_SCALE_LABELS[textScale.value]}，点击切换`
@@ -28,10 +42,15 @@ const groupLabel = computed(
       :key="opt.id"
       type="button"
       :aria-label="`字号${TEXT_SCALE_LABELS[opt.id]}`"
-      :aria-pressed="textScale === opt.id"
+      :aria-pressed="isScaleOptionActive(textScale, opt.id, isWideViewport)"
       @click="setTextScale(opt.id)"
-      class="text-scale-toggle__btn relative px-2 py-1 rounded-lg text-app-2xs font-bold transition-colors cursor-pointer min-w-[1.75rem]"
-      :class="textScale === opt.id ? 'text-scale-toggle__btn--active' : ''"
+      class="text-scale-toggle__btn relative py-1 rounded-lg text-app-2xs font-bold transition-colors cursor-pointer"
+      :class="[
+        isWideViewport ? 'px-1.5 min-w-[1.5rem]' : 'px-2 min-w-[1.75rem]',
+        isScaleOptionActive(textScale, opt.id, isWideViewport)
+          ? 'text-scale-toggle__btn--active'
+          : '',
+      ]"
     >
       <span class="relative z-10">{{ opt.short }}</span>
     </button>

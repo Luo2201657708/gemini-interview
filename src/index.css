@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* ── Text scale (compact / normal / comfortable) ───────────── */
+/* ── Text scale: mobile 3 tiers, tablet/desktop 5 tiers ───── */
 :root,
 [data-text-scale="normal"] {
   --app-scale: 1;
@@ -10,8 +10,24 @@
   --app-scale: 0.86;
 }
 
-[data-text-scale="comfortable"] {
+[data-text-scale="comfortable"],
+[data-text-scale="large"],
+[data-text-scale="xlarge"] {
   --app-scale: 1.06;
+}
+
+@media (min-width: 768px) {
+  [data-text-scale="comfortable"] {
+    --app-scale: 1.1;
+  }
+
+  [data-text-scale="large"] {
+    --app-scale: 1.22;
+  }
+
+  [data-text-scale="xlarge"] {
+    --app-scale: 1.36;
+  }
 }
 
 html {
