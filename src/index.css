@@ -236,17 +236,22 @@ html {
 }
 
 @media (min-width: 768px) {
+  .flashcard-stage {
+    align-items: stretch;
+  }
+
   .flashcard-card {
-    width: min(100%, 26rem);
+    width: min(100%, 32rem);
     height: auto;
-    max-height: min(100%, 34rem);
+    max-height: min(100%, 38rem);
+    margin-inline: auto;
   }
 }
 
 @media (min-width: 1024px) {
   .flashcard-card {
-    width: min(100%, 22rem);
-    max-height: min(100%, 32rem);
+    width: min(100%, 36rem);
+    max-height: min(100%, 40rem);
   }
 }
 
@@ -257,13 +262,13 @@ html {
   }
 }
 
-.phone-shell-inner {
+.app-main-inner {
   padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
 }
 
 @media (min-width: 768px) {
-  .phone-shell-inner {
-    padding-bottom: max(1.25rem, env(safe-area-inset-bottom, 0px));
+  .app-main-inner {
+    padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
   }
 }
 

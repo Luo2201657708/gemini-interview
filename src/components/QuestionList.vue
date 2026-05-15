@@ -57,7 +57,7 @@ function getLevelBadgeClass(level: string) {
 </script>
 
 <template>
-  <div class="space-y-3 pb-8">
+  <div class="space-y-3 pb-8 xl:grid xl:grid-cols-2 xl:gap-4 xl:space-y-0">
     <div 
       v-for="q in questions" 
       :key="q.id"

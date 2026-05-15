@@ -288,7 +288,7 @@ function getLevelBadgeClass(level: string) {
 
 <template>
   <div class="flex flex-col h-full min-h-0 justify-between gap-2 sm:gap-3 md:gap-3">
-    <div v-if="currentQuestion" class="flashcard-stage flex-1 min-h-0 w-full flex flex-col items-center justify-center md:items-stretch px-0.5 py-1 md:py-2 overflow-hidden">
+    <div v-if="currentQuestion" class="flashcard-stage flex-1 min-h-0 w-full flex flex-col items-center justify-center md:justify-stretch px-0.5 py-1 md:py-1 overflow-hidden">
       <div
         class="flashcard-card perspective-1000 cursor-pointer select-none touch-pan-y"
         :class="cardMotionClass"

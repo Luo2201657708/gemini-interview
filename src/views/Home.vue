@@ -58,7 +58,7 @@ const totalQuestionsCount = computed(() => {
 
 <template>
   <div class="flex-1 flex flex-col h-full overflow-hidden">
-    <div class="mb-4 pr-24 lg:pr-0">
+    <div class="mb-4 pr-24 md:pr-0">
       <p class="text-app-sm-cap font-mono text-app-muted uppercase tracking-widest">
         CodeMaster Interview Deck
       </p>
@@ -135,7 +135,7 @@ const totalQuestionsCount = computed(() => {
           <span class="text-app-sm-cap text-app-secondary font-mono">总题数: {{ totalQuestionsCount }}</span>
         </div>
 
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-3 pb-8">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 pb-8">
           <div
             v-for="cat in store.questionBank"
             :key="cat.category"

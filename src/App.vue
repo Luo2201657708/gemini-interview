@@ -50,8 +50,8 @@ const activeComponentStack = computed(() => {
 <template>
   <div class="h-screen w-screen bg-app text-app font-sans flex flex-col overflow-hidden">
     
-    <!-- DESKTOP HEADER -->
-    <div class="hidden lg:flex w-full bg-app border-b border-app-subtle py-3.5 px-6 shrink-0 justify-between items-center">
+    <!-- TABLET / DESKTOP HEADER -->
+    <div class="hidden md:flex w-full bg-app border-b border-app-subtle py-3.5 px-6 shrink-0 justify-between items-center">
       <div class="flex items-center gap-2.5">
         <div class="bg-app-accent-solid text-white p-2 rounded-xl scale-95 flex items-center justify-center">
           <Terminal :size="16" />
@@ -80,13 +80,13 @@ const activeComponentStack = computed(() => {
     <!-- MOBILE: toggles on home (category page has its own toolbar) -->
     <div
       v-if="currentCategoryName === null"
-      class="lg:hidden fixed top-3 right-3 z-50 flex items-center gap-2"
+      class="md:hidden fixed top-3 right-3 z-50 flex items-center gap-2"
     >
       <TextScaleToggle />
       <ThemeToggle />
     </div>
 
-    <div class="flex-1 w-full max-w-[90rem] mx-auto flex lg:flex-row flex-col justify-stretch items-stretch min-h-0 overflow-hidden md:p-4 lg:gap-5 lg:px-6 lg:py-5">
+    <div class="flex-1 w-full max-w-[90rem] mx-auto flex lg:flex-row flex-col justify-stretch items-stretch min-h-0 overflow-hidden md:px-3 md:py-2 lg:gap-4 lg:px-5 lg:py-4">
       
       <div class="hidden xl:flex xl:w-[240px] 2xl:w-[260px] flex-col gap-4 p-3 shrink-0 text-left self-start justify-start select-none pt-2">
         <div class="space-y-1">
@@ -113,9 +113,9 @@ const activeComponentStack = computed(() => {
         </div>
       </div>
 
-      <div class="flex-1 w-full min-w-0 flex justify-center items-stretch overflow-hidden h-full min-h-0">
-        <div class="app-shell relative w-full h-[100dvh] md:h-full md:max-h-[100dvh] md:min-h-0 bg-app flex flex-col overflow-hidden md:max-w-2xl md:mx-auto md:rounded-3xl md:border md:border-app md:shadow-2xl lg:mx-0 lg:max-w-xl xl:max-w-2xl lg:w-full lg:max-h-[min(100dvh,52rem)]">
-          <div class="phone-shell-inner flex-1 flex flex-col p-4 pt-4 md:p-5 md:pt-5 lg:p-6 lg:pt-6 bg-app h-full overflow-hidden min-h-0">
+      <div class="flex-1 w-full min-w-0 flex items-stretch overflow-hidden h-full min-h-0">
+        <div class="app-main relative w-full h-[100dvh] md:h-full md:min-h-0 bg-app flex flex-col overflow-hidden">
+          <div class="app-main-inner flex-1 flex flex-col p-4 pt-4 md:p-4 md:pt-4 lg:p-5 lg:pt-5 bg-app h-full overflow-hidden min-h-0">
             <KeepAlive>
               <HomeView 
                 v-if="currentCategoryName === null"
@@ -191,7 +191,7 @@ const activeComponentStack = computed(() => {
 
     </div>
 
-    <div class="hidden lg:flex w-full bg-app border-t border-app-subtle py-2.5 px-6 shrink-0 justify-between items-center text-[10px] text-app-faint font-mono">
+    <div class="hidden md:flex w-full bg-app border-t border-app-subtle py-2.5 px-6 shrink-0 justify-between items-center text-[10px] text-app-faint font-mono">
       <div>DESIGN: THEME_AWARE_V1</div>
       <div>VIEWPORT: RESPONSIVE (MOBILE / TABLET / DESKTOP)</div>
       <div class="flex items-center gap-1">
