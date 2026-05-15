@@ -24,8 +24,12 @@ const scrollContainerRef = ref<HTMLElement | null>(null)
 const showScrollChrome = ref(true)
 const lastScrollTop = ref(0)
 
-const SCROLL_DELTA = 6
-const TOP_SHOW_OFFSET = 16
+const SCROLL_DELTA = 4
+const TOP_SHOW_OFFSET = 20
+const HIDE_ACCUM_THRESHOLD = 56
+const SHOW_ACCUM_THRESHOLD = 28
+
+const scrollAccum = ref(0)
 
 function onListScroll() {
   if (studyMode.value !== 'list') return
@@ -37,6 +41,7 @@ function onListScroll() {
 
   if (scrollTop <= TOP_SHOW_OFFSET) {
     showScrollChrome.value = true
+    scrollAccum.value = 0
     lastScrollTop.value = scrollTop
     return
   }
@@ -44,12 +49,26 @@ function onListScroll() {
   const delta = scrollTop - lastScrollTop.value
   if (Math.abs(delta) < SCROLL_DELTA) return
 
-  showScrollChrome.value = delta < 0
+  if (delta > 0) {
+    scrollAccum.value = Math.max(0, scrollAccum.value) + delta
+    if (scrollAccum.value >= HIDE_ACCUM_THRESHOLD) {
+      showScrollChrome.value = false
+      scrollAccum.value = 0
+    }
+  } else {
+    scrollAccum.value = Math.min(0, scrollAccum.value) + delta
+    if (scrollAccum.value <= -SHOW_ACCUM_THRESHOLD) {
+      showScrollChrome.value = true
+      scrollAccum.value = 0
+    }
+  }
+
   lastScrollTop.value = scrollTop
 }
 
 watch(studyMode, () => {
   showScrollChrome.value = true
+  scrollAccum.value = 0
   lastScrollTop.value = scrollContainerRef.value?.scrollTop ?? 0
 })
 
@@ -202,10 +221,11 @@ const viewProgress = computed(() => {
   margin-bottom: 1rem;
   opacity: 1;
   pointer-events: auto;
+  will-change: max-height, opacity, margin-bottom;
   transition:
-    max-height 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-    margin-bottom 0.32s cubic-bezier(0.4, 0, 0.2, 1),
-    opacity 0.24s ease;
+    max-height 0.52s cubic-bezier(0.33, 1, 0.68, 1),
+    margin-bottom 0.52s cubic-bezier(0.33, 1, 0.68, 1),
+    opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .chrome-collapse-shell--hidden {
@@ -213,6 +233,10 @@ const viewProgress = computed(() => {
   margin-bottom: 0;
   opacity: 0;
   pointer-events: none;
+  transition:
+    max-height 0.58s cubic-bezier(0.32, 0.72, 0, 1),
+    margin-bottom 0.58s cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 0.45s cubic-bezier(0.4, 0, 0.2, 1) 0.06s;
 }
 
 .chrome-collapse-shell--pinned {
@@ -224,12 +248,20 @@ const viewProgress = computed(() => {
 }
 
 .chrome-collapse-track {
-  transform: translateY(0);
-  transition: transform 0.32s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  transform-origin: top center;
+  transition:
+    transform 0.52s cubic-bezier(0.33, 1, 0.68, 1),
+    opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .chrome-collapse-shell--hidden .chrome-collapse-track {
-  transform: translateY(-100%);
+  transform: translateY(-0.625rem) scale(0.98);
+  opacity: 0;
+  transition:
+    transform 0.58s cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 0.38s cubic-bezier(0.4, 0, 0.2, 1) 0.04s;
 }
 
 .list-scroll-container {
