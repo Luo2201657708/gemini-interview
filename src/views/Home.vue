@@ -72,12 +72,12 @@ const percentCompleted = computed(() => {
   <div class="flex-1 flex flex-col h-full overflow-hidden">
     <!-- Header Summary Status -->
     <div class="mb-4">
-      <p class="text-[11px] font-mono text-slate-500 uppercase tracking-widest">
+      <p class="text-[11px] font-mono text-app-muted uppercase tracking-widest">
         CodeMaster Interview Deck
       </p>
-      <h2 class="text-xl font-bold text-white tracking-tight flex items-center gap-1.5 mt-0.5">
+      <h2 class="text-xl font-bold text-app-heading tracking-tight flex items-center gap-1.5 mt-0.5">
         <span>题库概览</span>
-        <span class="text-xs text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full font-mono border border-indigo-500/20">
+        <span class="text-xs text-app-accent bg-app-accent-bg px-2 py-0.5 rounded-full font-mono border border-app-accent">
           {{ store.questionBank.length }} 分类
         </span>
       </h2>
@@ -87,18 +87,18 @@ const percentCompleted = computed(() => {
     <div class="space-y-3 mb-5">
       <!-- Search Input box -->
       <div class="relative flex items-center">
-        <Search class="absolute left-3.5 text-slate-500" :size="16" />
+        <Search class="absolute left-3.5 text-app-muted" :size="16" />
         <input 
           v-model="searchKeyword"
           type="text" 
           placeholder="搜索题目关键字或解析内容..." 
-          class="w-full bg-slate-900 border border-slate-800 text-slate-100 text-xs rounded-2xl pl-10 pr-4 py-3 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+          class="w-full bg-app-input border border-app text-app text-xs rounded-2xl pl-10 pr-4 py-3 placeholder:text-app-muted focus:outline-none focus:border-app-accent transition-colors"
         />
         <!-- Close search cross -->
         <button 
           v-if="searchKeyword" 
           @click="searchKeyword = ''"
-          class="absolute right-3.5 text-slate-500 hover:text-slate-300 text-xs bg-slate-800 rounded-full w-5 h-5 flex items-center justify-center font-mono leading-none"
+          class="absolute right-3.5 text-app-muted hover:text-app-heading text-xs bg-app-surface-hover rounded-full w-5 h-5 flex items-center justify-center font-mono leading-none"
         >
           ×
         </button>
@@ -108,22 +108,22 @@ const percentCompleted = computed(() => {
       <div class="flex gap-2">
         <button 
           @click="handleFavoritesClick"
-          class="w-full bg-slate-900/60 hover:bg-slate-900 border border-slate-800 rounded-2xl p-3 text-left flex items-center justify-between transition group cursor-pointer"
+          class="w-full bg-app-muted hover:bg-app-surface border border-app rounded-2xl p-3 text-left flex items-center justify-between transition group cursor-pointer"
         >
           <div class="flex items-center gap-2.5">
             <div class="bg-amber-500/10 text-amber-400 p-2 rounded-xl border border-amber-500/15 group-hover:scale-105 transition-transform">
               <Star :size="14" fill="currentColor" />
             </div>
             <div>
-              <div class="text-xs font-bold text-slate-200">
+              <div class="text-xs font-bold text-app">
                 我的收藏
               </div>
-              <div class="text-[10px] text-slate-500">
+              <div class="text-[10px] text-app-muted">
                 共收藏 {{ store.favorites.length }} 道面试题
               </div>
             </div>
           </div>
-          <ChevronRight :size="14" class="text-slate-600 group-hover:text-slate-400 transition" />
+          <ChevronRight :size="14" class="text-app-faint group-hover:text-app-secondary transition" />
         </button>
       </div>
     </div>
@@ -133,10 +133,10 @@ const percentCompleted = computed(() => {
       <!-- Search results view -->
       <div v-if="searchKeyword" class="space-y-4">
         <div class="flex items-center justify-between px-1">
-          <span class="text-[10px] text-slate-500 uppercase tracking-widest font-mono">
+          <span class="text-[10px] text-app-muted uppercase tracking-widest font-mono">
             Search Matches
           </span>
-          <span class="text-[10px] text-indigo-400 font-mono">
+          <span class="text-[10px] text-app-accent font-mono">
             找到 {{ searchResults.length }} 条结果
           </span>
         </div>
@@ -147,20 +147,20 @@ const percentCompleted = computed(() => {
           categoryName="搜索结果"
         />
 
-        <div v-else class="text-center py-12 bg-slate-900/40 rounded-2xl border border-slate-800">
-          <BookOpen class="mx-auto text-slate-600 mb-2 stroke-[1.5]" :size="32" />
-          <p class="text-slate-500 text-xs">没有找到与其匹配的题目</p>
-          <p class="text-slate-600 text-[10px] mt-1.5">试着输入 “指针”, “内存” 或 “进程” 等核心词汇</p>
+        <div v-else class="text-center py-12 bg-app-muted rounded-2xl border border-app">
+          <BookOpen class="mx-auto text-app-faint mb-2 stroke-[1.5]" :size="32" />
+          <p class="text-app-muted text-xs">没有找到与其匹配的题目</p>
+          <p class="text-app-faint text-[10px] mt-1.5">试着输入 “指针”, “内存” 或 “进程” 等核心词汇</p>
         </div>
       </div>
 
       <!-- Standard categories grid -->
       <div v-else class="space-y-5">
         <div class="flex items-center justify-between px-1">
-          <span class="text-[10px] text-slate-500 uppercase tracking-widest font-mono">
+          <span class="text-[10px] text-app-muted uppercase tracking-widest font-mono">
             Technical Categories
           </span>
-          <span class="text-[11px] text-slate-400 font-mono">
+          <span class="text-[11px] text-app-secondary font-mono">
             总题数: {{ totalQuestionsCount }}
           </span>
         </div>
@@ -171,7 +171,7 @@ const percentCompleted = computed(() => {
             v-for="cat in store.questionBank" 
             :key="cat.category"
             @click="handleCategoryClick(cat.category)"
-            class="bg-slate-900/60 hover:bg-slate-900 border border-slate-850 hover:border-slate-700/80 rounded-2xl p-4 flex flex-col justify-between gap-3 transition cursor-pointer select-none group relative overflow-hidden"
+            class="bg-app-muted hover:bg-app-surface border border-app hover:border-app-strong rounded-2xl p-4 flex flex-col justify-between gap-3 transition cursor-pointer select-none group relative overflow-hidden"
           >
             <!-- Emojis & Counts -->
             <div class="flex justify-between items-start">
@@ -189,24 +189,24 @@ const percentCompleted = computed(() => {
 
             <!-- Labels -->
             <div>
-              <h3 class="font-bold text-xs text-slate-100 group-hover:text-indigo-400 transition-colors">
+              <h3 class="font-bold text-xs text-app group-hover:text-app-accent transition-colors">
                 {{ cat.category }}
               </h3>
               <div class="flex items-center gap-1 mt-1">
-                <span class="text-[10px] text-slate-500 font-mono">
+                <span class="text-[10px] text-app-muted font-mono">
                   {{ cat.questions.length }} 题
                 </span>
-                <span class="text-[9px] text-slate-600 font-mono">•</span>
-                <span class="text-[9px] text-slate-400 font-mono">
+                <span class="text-[9px] text-app-faint font-mono">•</span>
+                <span class="text-[9px] text-app-secondary font-mono">
                   已掌握 {{ store.categoryProgress(cat.category).masteredCount }}
                 </span>
               </div>
             </div>
 
             <!-- Custom Category progress mini bar -->
-            <div class="w-full bg-slate-950 rounded-full h-1 mt-1 overflow-hidden">
+            <div class="w-full bg-app-inset rounded-full h-1 mt-1 overflow-hidden">
               <div 
-                class="h-full bg-indigo-500 transition-all duration-300"
+                class="h-full bg-app-accent-solid transition-all duration-300"
                 :style="{ width: store.categoryProgress(cat.category).percent + '%' }"
               ></div>
             </div>
@@ -216,14 +216,14 @@ const percentCompleted = computed(() => {
     </div>
 
     <!-- Sticky Progress Box on Homepage bottom -->
-    <div v-if="!searchKeyword" class="mt-auto pt-3 border-t border-slate-900">
-      <div class="bg-gradient-to-br from-indigo-900/60 to-purple-950/40 p-4 rounded-2xl border border-indigo-500/10 flex items-center justify-between gap-4">
+    <div v-if="!searchKeyword" class="mt-auto pt-3 border-t border-app-subtle">
+      <div class="bg-app-gradient p-4 rounded-2xl border border-app-accent flex items-center justify-between gap-4">
         <div class="flex-1">
-          <div class="flex items-center gap-1.5 text-xs text-indigo-300 font-bold mb-1">
+          <div class="flex items-center gap-1.5 text-xs text-app-accent-muted font-bold mb-1">
             <Award :size="13" />
             <span>面试实力评级</span>
           </div>
-          <p class="text-[10px] text-slate-400 leading-relaxed font-light">
+          <p class="text-[10px] text-app-secondary leading-relaxed font-light">
             已攻克 {{ masteredQuestionsCount }} 道技术难关。
             {{ percentCompleted < 20 ? '仍需继续积累实力。' : percentCompleted < 50 ? '战力正在强力跃升中！' : percentCompleted < 80 ? '资深实力展露无遗！' : '面试通关率爆表！' }}
           </p>
@@ -232,7 +232,7 @@ const percentCompleted = computed(() => {
         <div class="text-right flex flex-col items-center">
           <div class="relative w-14 h-14 flex items-center justify-center">
             <!-- Center master percentage radial count -->
-            <span class="text-sm font-black text-white font-mono leading-none">
+            <span class="text-sm font-black text-app-heading font-mono leading-none">
               {{ percentCompleted }}%
             </span>
             <!-- Simple clean indicator style wrapper -->
@@ -246,7 +246,7 @@ const percentCompleted = computed(() => {
                 cx="28" cy="28" r="24" 
                 stroke="currentColor" stroke-width="4" 
                 fill="none" 
-                class="text-indigo-500"
+                class="text-app-accent-solid"
                 :stroke-dasharray="2 * Math.PI * 24"
                 :stroke-dashoffset="2 * Math.PI * 24 * (1 - percentCompleted / 100)"
               />
@@ -264,12 +264,5 @@ const percentCompleted = computed(() => {
 }
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.15);
 }
 </style>
