@@ -37,7 +37,7 @@ function handleBackToHome() {
           <h1 class="text-sm font-bold text-app-heading tracking-tight flex items-center gap-1.5 leading-none">
             CodeMaster Pro <span class="font-mono text-[9px] bg-app-chrome-badge text-app-accent px-1.5 py-0.5 rounded border border-app-accent">v3.0.0</span>
           </h1>
-          <p class="text-[10px] text-app-muted mt-0.5">程序员面试刷题与复习 (Mona-H5 Simulator)</p>
+          <p class="text-[10px] text-app-muted mt-0.5">程序员面试刷题与复习</p>
         </div>
       </div>
 
