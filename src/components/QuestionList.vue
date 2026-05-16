@@ -2,6 +2,7 @@
 import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { useAppStore, Question } from '../store'
 import { Star, Check, ChevronDown, ChevronUp } from 'lucide-vue-next'
+import QuestionFeedback from './QuestionFeedback.vue'
 
 const props = defineProps<{
   questions: Question[]
@@ -189,6 +190,8 @@ function getLevelBadgeClass(level: string) {
                 <Check :size="12" class="stroke-[3]" />
                 <span>{{ store.isMastered(q.id) ? '已掌握' : '标为掌握' }}</span>
               </button>
+
+              <QuestionFeedback :question="q" :category-name="categoryName" variant="inline" />
             </div>
           </div>
         </div>
