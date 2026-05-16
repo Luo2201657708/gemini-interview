@@ -148,7 +148,7 @@ function getLevelBadgeClass(level: string) {
           v-show="expandedId === q.id"
           class="border-t border-app p-4 bg-app-inset/40 rounded-b-2xl"
         >
-          <div class="text-app-secondary text-xs leading-relaxed whitespace-pre-line font-light">
+          <div class="text-app-secondary text-sm leading-relaxed whitespace-pre-line font-light">
             <div v-if="q.answer">
               {{ q.answer }}
             </div>
