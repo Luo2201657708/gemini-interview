@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAppStore } from '../store'
 import { ArrowLeft, Plus, Trash2, Download, FileText, Copy, Check } from 'lucide-vue-next'
+import MobileCategoryPicker from '../components/MobileCategoryPicker.vue'
+import DesktopCategorySelect from '../components/DesktopCategorySelect.vue'
 
 const STORE_LEVELS = ['必问', '重点', '了解'] as const
 type Level = (typeof STORE_LEVELS)[number]
@@ -21,6 +23,22 @@ const emit = defineEmits<{
 const store = useAppStore()
 
 const categoryOptions = computed(() => store.questionBank.map((c) => c.category))
+
+const isMobile = ref(false)
+let mq: MediaQueryList | null = null
+function syncMobileFlag() {
+  isMobile.value = mq?.matches ?? false
+}
+
+onMounted(() => {
+  mq = window.matchMedia('(max-width: 639px)')
+  syncMobileFlag()
+  mq.addEventListener('change', syncMobileFlag)
+})
+
+onUnmounted(() => {
+  mq?.removeEventListener('change', syncMobileFlag)
+})
 
 function emptyRow(): DraftRow {
   return { category: '', author: '', question: '', answer: '', level: '重点' }
@@ -179,16 +197,25 @@ function downloadMd() {
           <label class="block text-app-2xs font-bold text-app-secondary uppercase tracking-wide"
             >分类 <span class="text-rose-400">*</span></label
           >
-          <input
+          <MobileCategoryPicker
+            v-if="isMobile && categoryOptions.length"
             v-model="row.category"
-            type="text"
-            list="add-q-categories"
-            class="w-full rounded-xl border border-app bg-app-input text-app text-xs px-3 py-2.5 focus:outline-none focus:border-app-accent"
-            placeholder="选择或输入分类名称"
+            :options="categoryOptions"
           />
-          <datalist id="add-q-categories">
-            <option v-for="c in categoryOptions" :key="c" :value="c" />
-          </datalist>
+          <template v-else>
+            <DesktopCategorySelect
+              v-if="categoryOptions.length"
+              v-model="row.category"
+              :options="categoryOptions"
+            />
+            <input
+              v-else
+              v-model="row.category"
+              type="text"
+              class="w-full rounded-xl border border-app bg-app-input text-app text-xs px-3 py-2.5 focus:outline-none focus:border-app-accent"
+              placeholder="输入分类名称"
+            />
+          </template>
         </div>
 
         <div class="space-y-2">
