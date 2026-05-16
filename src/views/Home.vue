@@ -57,59 +57,59 @@ const totalQuestionsCount = computed(() => {
 </script>
 
 <template>
-  <div class="flex-1 flex flex-col h-full overflow-hidden">
-    <div class="mb-4 pr-24 md:pr-0">
-      <p class="text-app-sm-cap font-mono text-app-muted uppercase tracking-widest">
-        CodeMaster Interview Deck
-      </p>
-      <h2 class="text-xl font-bold text-app-heading tracking-tight flex items-center gap-1.5 mt-0.5">
-        <span>题库概览</span>
-        <span class="text-xs text-app-accent bg-app-accent-bg px-2 py-0.5 rounded-full font-mono border border-app-accent">
-          {{ store.questionBank.length }} 分类
-        </span>
-      </h2>
-    </div>
-
-    <div class="space-y-3 mb-5">
-      <div class="relative flex items-center">
-        <Search class="absolute left-3.5 text-app-muted" :size="16" />
-        <input
-          v-model="searchKeyword"
-          type="text"
-          placeholder="搜索题目关键字或解析内容..."
-          class="w-full bg-app-input border border-app text-app text-xs rounded-2xl pl-10 pr-4 py-3 placeholder:text-app-muted focus:outline-none focus:border-app-accent transition-colors"
-        />
-        <button
-          v-if="searchKeyword"
-          @click="searchKeyword = ''"
-          class="absolute right-3.5 text-app-muted hover:text-app-heading text-xs bg-app-surface-hover rounded-full w-5 h-5 flex items-center justify-center font-mono leading-none"
-        >
-          ×
-        </button>
+  <div class="flex-1 flex flex-col min-h-0 overflow-hidden">
+    <div class="flex-1 min-h-0 overflow-y-auto pr-1 select-none custom-scrollbar">
+      <div class="mb-4 pr-24 md:pr-0">
+        <p class="text-app-sm-cap font-mono text-app-muted uppercase tracking-widest">
+          CodeMaster Interview Deck
+        </p>
+        <h2 class="text-xl font-bold text-app-heading tracking-tight flex items-center gap-1.5 mt-0.5">
+          <span>题库概览</span>
+          <span class="text-xs text-app-accent bg-app-accent-bg px-2 py-0.5 rounded-full font-mono border border-app-accent">
+            {{ store.questionBank.length }} 分类
+          </span>
+        </h2>
       </div>
 
-      <div class="flex gap-2">
-        <button
-          @click="handleFavoritesClick"
-          class="w-full bg-app-muted hover:bg-app-surface border border-app rounded-2xl p-3 text-left flex items-center justify-between transition group cursor-pointer"
-        >
-          <div class="flex items-center gap-2.5">
-            <div class="bg-amber-500/10 text-amber-400 p-2 rounded-xl border border-amber-500/15 group-hover:scale-105 transition-transform">
-              <Star :size="14" fill="currentColor" />
-            </div>
-            <div>
-              <div class="text-xs font-bold text-app">我的收藏</div>
-              <div class="text-app-xs text-app-muted">
-                共收藏 {{ store.favorites.length }} 道面试题
+      <div class="space-y-3 mb-5">
+        <div class="relative flex items-center">
+          <Search class="absolute left-3.5 text-app-muted" :size="16" />
+          <input
+            v-model="searchKeyword"
+            type="text"
+            placeholder="搜索题目关键字或解析内容..."
+            class="w-full bg-app-input border border-app text-app text-xs rounded-2xl pl-10 pr-4 py-3 placeholder:text-app-muted focus:outline-none focus:border-app-accent transition-colors"
+          />
+          <button
+            v-if="searchKeyword"
+            @click="searchKeyword = ''"
+            class="absolute right-3.5 text-app-muted hover:text-app-heading text-xs bg-app-surface-hover rounded-full w-5 h-5 flex items-center justify-center font-mono leading-none"
+          >
+            ×
+          </button>
+        </div>
+
+        <div class="flex gap-2">
+          <button
+            @click="handleFavoritesClick"
+            class="w-full bg-app-muted hover:bg-app-surface border border-app rounded-2xl p-3 text-left flex items-center justify-between transition group cursor-pointer"
+          >
+            <div class="flex items-center gap-2.5">
+              <div class="bg-amber-500/10 text-amber-400 p-2 rounded-xl border border-amber-500/15 group-hover:scale-105 transition-transform">
+                <Star :size="14" fill="currentColor" />
+              </div>
+              <div>
+                <div class="text-xs font-bold text-app">我的收藏</div>
+                <div class="text-app-xs text-app-muted">
+                  共收藏 {{ store.favorites.length }} 道面试题
+                </div>
               </div>
             </div>
-          </div>
-          <ChevronRight :size="14" class="text-app-faint group-hover:text-app-secondary transition" />
-        </button>
+            <ChevronRight :size="14" class="text-app-faint group-hover:text-app-secondary transition" />
+          </button>
+        </div>
       </div>
-    </div>
 
-    <div class="flex-1 overflow-y-auto pr-1 select-none custom-scrollbar">
       <div v-if="searchKeyword" class="space-y-4">
         <div class="flex items-center justify-between px-1">
           <span class="text-app-xs text-app-muted uppercase tracking-widest font-mono">Search Matches</span>
