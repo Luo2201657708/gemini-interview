@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { useAppStore } from './store'
 import { Terminal, Database, Cpu, CheckCircle2, Info } from 'lucide-vue-next'
 import HomeView from './views/Home.vue'
@@ -7,6 +7,7 @@ import CategoryView from './views/Category.vue'
 import AddQuestionsView from './views/AddQuestions.vue'
 import ThemeToggle from './components/ThemeToggle.vue'
 import TextScaleToggle from './components/TextScaleToggle.vue'
+import { CATEGORY_RIGHT_RAIL_MEDIA, TW_LG_MEDIA } from './constants/categoryRailMedia'
 
 const store = useAppStore()
 
@@ -42,6 +43,43 @@ function handleAddQuestions() {
 function handleBackToHome() {
   mainView.value = { kind: 'home' }
 }
+
+/** lg breakpoint aligned with Tailwind `lg` (1024px): pure layout + controls that stay lg-only */
+const isLgUp = ref(false)
+function syncIsLgUp() {
+  isLgUp.value =
+    typeof window !== 'undefined' && window.matchMedia(TW_LG_MEDIA).matches
+}
+
+/**
+ * Pinia rail + `#category-toolbar-anchor`: same breakpoints as Category.vue teleport
+ * (see CATEGORY_RIGHT_RAIL_MEDIA — avoids “rail visible but teleport off”).
+ */
+const rightRailVisible = ref(false)
+function syncRightRailVisible() {
+  rightRailVisible.value =
+    typeof window !== 'undefined' && window.matchMedia(CATEGORY_RIGHT_RAIL_MEDIA).matches
+}
+
+let lgMq: MediaQueryList | null = null
+let rightRailMq: MediaQueryList | null = null
+
+onMounted(() => {
+  syncIsLgUp()
+  syncRightRailVisible()
+  lgMq = window.matchMedia(TW_LG_MEDIA)
+  lgMq.addEventListener('change', syncIsLgUp)
+  rightRailMq = window.matchMedia(CATEGORY_RIGHT_RAIL_MEDIA)
+  rightRailMq.addEventListener('change', syncRightRailVisible)
+})
+
+onUnmounted(() => {
+  lgMq?.removeEventListener('change', syncIsLgUp)
+  rightRailMq?.removeEventListener('change', syncRightRailVisible)
+})
+
+/** Side rails hidden; main column centered (phones/sm: unchanged — rails already absent). */
+const pureLayoutActive = computed(() => store.pureMode && isLgUp.value)
 </script>
 
 <template>
@@ -69,6 +107,20 @@ function handleBackToHome() {
       </div>
 
       <div class="flex items-center gap-3">
+        <button
+          type="button"
+          class="hidden lg:inline-flex items-center rounded-xl border px-3 py-1.5 text-app-2xs font-bold tracking-tight transition cursor-pointer select-none"
+          :class="
+            store.pureMode
+              ? 'border-app-accent bg-app-accent-bg text-app-accent'
+              : 'border-app text-app-secondary hover:border-app-strong hover:text-app-heading bg-app-surface'
+          "
+          :aria-pressed="store.pureMode"
+          title="隐藏左右侧栏，居中主学习区（≥1024px 有效）"
+          @click="store.togglePureMode()"
+        >
+          纯净模式
+        </button>
         <TextScaleToggle />
         <ThemeToggle />
       </div>
@@ -83,9 +135,20 @@ function handleBackToHome() {
       <ThemeToggle />
     </div>
 
-    <div class="flex-1 w-full max-w-[90rem] mx-auto flex lg:flex-row flex-col justify-stretch items-stretch min-h-0 overflow-hidden md:px-3 md:py-2 lg:gap-4 lg:px-5 lg:py-4">
+    <div
+      class="flex-1 w-full mx-auto flex justify-stretch items-stretch min-h-0 overflow-hidden"
+      :class="[
+        rightRailVisible
+          ? 'flex-row gap-4 px-5 py-4'
+          : 'flex-col md:px-3 md:py-2 lg:gap-4 lg:px-5 lg:py-4',
+        pureLayoutActive ? 'max-w-5xl xl:max-w-6xl' : 'max-w-[90rem]',
+      ]"
+    >
       
-      <div class="hidden xl:flex xl:w-[240px] 2xl:w-[260px] flex-col gap-4 p-3 shrink-0 text-left self-start justify-start select-none pt-2">
+      <div
+        class="flex-col gap-4 p-3 shrink-0 text-left self-start justify-start select-none pt-2 xl:w-[240px] 2xl:w-[260px] order-1"
+        :class="pureLayoutActive ? 'hidden' : 'hidden xl:flex'"
+      >
         <div class="space-y-1">
           <h3 class="text-sm font-extrabold text-app-heading">架构师复习法</h3>
           <p class="text-[11px] text-app-secondary leading-relaxed font-light">
@@ -110,43 +173,26 @@ function handleBackToHome() {
         </div>
       </div>
 
-      <div class="flex-1 w-full min-w-0 flex items-stretch overflow-hidden h-full min-h-0">
-        <div class="app-main relative w-full h-[100dvh] md:h-full md:min-h-0 bg-app flex flex-col overflow-hidden">
-          <div
-            class="app-main-inner flex-1 flex flex-col bg-app h-full overflow-hidden min-h-0 transition-[padding] duration-[520ms] ease-[cubic-bezier(0.33,1,0.68,1)] p-4 md:p-4 lg:p-5"
-            :class="
-              categoryFlashcardImmersive
-                ? 'pt-2 md:pt-2 lg:pt-3'
-                : 'pt-4 md:pt-4 lg:pt-5'
-            "
-          >
-            <KeepAlive>
-              <HomeView
-                v-if="mainView.kind === 'home'"
-                @select-category="handleSelectCategory"
-                @view-favorites="handleViewFavorites"
-                @add-questions="handleAddQuestions"
-              />
-              <AddQuestionsView
-                v-else-if="mainView.kind === 'add-questions'"
-                @back="handleBackToHome"
-              />
-              <CategoryView
-                v-else
-                :category-name="mainView.categoryName"
-                @back="handleBackToHome"
-                @flashcard-immersive="handleCategoryFlashcardImmersive"
-              />
-            </KeepAlive>
-          </div>
-        </div>
-      </div>
+      <!-- DOM before main column so #category-toolbar-anchor exists when CategoryView enables Teleport -->
+      <div
+        class="flex-col gap-4 p-3 xl:p-4 shrink-0 text-left self-start justify-start pt-2 w-[220px] xl:w-[265px] order-3"
+        :class="
+          pureLayoutActive || !rightRailVisible
+            ? 'hidden'
+            : 'flex flex-col'
+        "
+      >
+        <!-- Landscape lg+: Category.vue teleports mode/filter toolbar here (above Pinia). -->
+        <div
+          v-if="mainView.kind === 'category'"
+          id="category-toolbar-anchor"
+          class="min-w-0 w-full shrink-0 flex flex-col"
+        />
 
-      <div class="hidden lg:flex lg:w-[220px] xl:w-[265px] flex-col gap-4 p-3 xl:p-4 shrink-0 text-left self-start justify-start pt-2">
         <div class="bg-app-panel rounded-2xl border border-app p-4.5">
           <div class="flex items-center gap-1.5 text-app-secondary text-xs font-bold mb-3">
             <Database :size="13" />
-            <span class="uppercase tracking-widest">Pinia Active State</span>
+            <span class="uppercase tracking-widest">Pinia 当前状态</span>
           </div>
           <div class="space-y-2.5 font-mono text-[11px]">
             <div class="flex justify-between items-center py-1 border-b border-app/50">
@@ -193,6 +239,41 @@ function handleBackToHome() {
           <p class="text-[9px] leading-relaxed text-app-secondary">
             <strong>本地缓存已启用</strong>。收藏数据与掌握记录已被缓存在浏览器 LocalStorage 中，离线测试不丢失状态。
           </p>
+        </div>
+      </div>
+
+      <div
+        class="flex-1 w-full min-w-0 flex items-stretch overflow-hidden h-full min-h-0 order-2"
+        :class="pureLayoutActive ? 'max-w-4xl xl:max-w-5xl 2xl:max-w-[56rem] mx-auto' : ''"
+      >
+        <div class="app-main relative w-full h-[100dvh] md:h-full md:min-h-0 bg-app flex flex-col overflow-hidden">
+          <div
+            class="app-main-inner flex-1 flex flex-col bg-app h-full overflow-hidden min-h-0 transition-[padding] duration-[520ms] ease-[cubic-bezier(0.33,1,0.68,1)] p-4 md:p-4 lg:p-5"
+            :class="
+              categoryFlashcardImmersive
+                ? 'pt-2 md:pt-2 lg:pt-3'
+                : 'pt-4 md:pt-4 lg:pt-5'
+            "
+          >
+            <KeepAlive>
+              <HomeView
+                v-if="mainView.kind === 'home'"
+                @select-category="handleSelectCategory"
+                @view-favorites="handleViewFavorites"
+                @add-questions="handleAddQuestions"
+              />
+              <AddQuestionsView
+                v-else-if="mainView.kind === 'add-questions'"
+                @back="handleBackToHome"
+              />
+              <CategoryView
+                v-else
+                :category-name="mainView.categoryName"
+                @back="handleBackToHome"
+                @flashcard-immersive="handleCategoryFlashcardImmersive"
+              />
+            </KeepAlive>
+          </div>
         </div>
       </div>
 

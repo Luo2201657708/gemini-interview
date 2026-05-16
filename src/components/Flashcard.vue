@@ -304,7 +304,7 @@ function getLevelBadgeClass(level: string) {
 
 <template>
   <div class="relative flex flex-col h-full min-h-0 justify-between gap-2 sm:gap-3 md:gap-3">
-    <div v-if="currentQuestion" class="flashcard-stage flex-1 min-h-0 w-full flex flex-col items-center justify-center px-0.5 py-1 md:py-1 overflow-hidden">
+    <div v-if="currentQuestion" class="flashcard-stage flex-1 min-h-0 w-full flex flex-col items-center justify-center py-1 md:py-1 overflow-hidden">
       <div
         class="flashcard-card perspective-1000 cursor-pointer select-none touch-pan-y"
         :class="cardMotionClass"
@@ -315,7 +315,7 @@ function getLevelBadgeClass(level: string) {
         @click="handleFlip"
       >
         <div 
-          class="w-full h-full relative transition-transform duration-500 transform-style-3d card-inner"
+          class="w-full h-full min-h-0 relative transition-transform duration-500 transform-style-3d card-inner"
           :class="{ 'rotate-y-180': isFlipped }"
         >
           <div class="absolute inset-0 w-full h-full backface-hidden bg-app-card-front rounded-3xl border border-app p-4 sm:p-6 flex flex-col items-center text-center shadow-xl justify-between">
@@ -345,7 +345,7 @@ function getLevelBadgeClass(level: string) {
               </button>
             </div>
 
-            <div class="flex-1 flex flex-col justify-center py-4 w-full">
+            <div class="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto overflow-x-hidden py-4 w-full">
               <h3 class="text-base sm:text-lg md:text-xl lg:text-2xl font-medium text-app leading-relaxed px-1 sm:px-2">
                 {{ currentQuestion.question }}
               </h3>
@@ -392,10 +392,15 @@ function getLevelBadgeClass(level: string) {
               </button>
             </div>
 
-            <div class="flex-1 min-h-0 my-2 sm:my-3 overflow-y-auto px-1 custom-scrollbar flex flex-col items-center justify-center" @click.stop>
-              <p class="text-app-secondary text-base sm:text-lg md:text-xl lg:text-2xl font-medium leading-relaxed whitespace-pre-line antialiased w-full text-center">
-                {{ currentQuestion.answer || '暂无详细文字回答，可以开启手风琴模式下的 AI 解析模块获得详细解说！' }}
-              </p>
+            <div
+              class="flex-1 min-h-0 my-2 sm:my-3 overflow-y-auto overflow-x-hidden px-1 sm:px-2 py-4 custom-scrollbar flex flex-col"
+              @click.stop
+            >
+              <div class="min-h-full w-full max-w-full flex flex-col justify-center">
+                <p class="text-app-secondary text-base sm:text-lg md:text-xl lg:text-2xl font-medium leading-relaxed whitespace-pre-line antialiased w-full text-center">
+                  {{ currentQuestion.answer || '暂无详细文字回答，可以开启手风琴模式下的 AI 解析模块获得详细解说！' }}
+                </p>
+              </div>
             </div>
 
             <div class="text-app-muted text-app-2xs md:text-app-xs text-center pointer-events-none mt-1 py-1 border-t border-app flex items-center justify-center gap-1 shrink-0">

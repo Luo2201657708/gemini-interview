@@ -241,6 +241,7 @@ html {
 .flashcard-stage {
   max-height: 100%;
   isolation: isolate;
+  padding-inline: 0.125rem;
 }
 
 .flashcard-card {
@@ -285,6 +286,21 @@ html {
     max-height: min(100%, 36rem);
     margin-inline: auto;
     aspect-ratio: 4 / 5;
+  }
+}
+
+/* Tablet portrait: toolbar spans full width; widen card vs narrow md/lg caps (e.g. 36rem at 1024px). Landscape unchanged — Category sidebar uses orientation: landscape queries only. */
+@media (orientation: portrait) and (min-width: 768px) {
+  .flashcard-stage {
+    padding-inline: 0.75rem;
+  }
+
+  .flashcard-card {
+    width: min(100%, 52rem);
+    height: auto;
+    max-height: min(88dvh, 42rem);
+    margin-inline: auto;
+    aspect-ratio: 5 / 6;
   }
 }
 

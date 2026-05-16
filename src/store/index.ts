@@ -13,12 +13,24 @@ export interface CategoryData {
   questions: Question[]
 }
 
+const PURE_MODE_STORAGE_KEY = 'pureMode'
+
+function readPureModeFromStorage(): boolean {
+  try {
+    return localStorage.getItem(PURE_MODE_STORAGE_KEY) === 'true'
+  } catch {
+    return false
+  }
+}
+
 export const useAppStore = defineStore('app', {
   state: () => ({
     questionBank: questionBankRaw as CategoryData[],
     favorites: JSON.parse(localStorage.getItem('favorites') || '[]') as string[],
     mastered: JSON.parse(localStorage.getItem('mastered') || '[]') as string[],
     selectedCategory: null as string | null, // Categories view state tracking
+    /** Wider layouts (lg+): hide side rails for a centered study column. Persisted like favorites/mastered. */
+    pureMode: readPureModeFromStorage(),
   }),
   getters: {
     // Global search keywords
@@ -120,6 +132,14 @@ export const useAppStore = defineStore('app', {
         this.mastered.splice(idx, 1)
       }
       localStorage.setItem('mastered', JSON.stringify(this.mastered))
-    }
+    },
+    togglePureMode() {
+      this.pureMode = !this.pureMode
+      try {
+        localStorage.setItem(PURE_MODE_STORAGE_KEY, this.pureMode ? 'true' : 'false')
+      } catch {
+        /* ignore quota / private mode */
+      }
+    },
   }
 })
