@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useAppStore, Question } from '../store'
-import { Search, Star, ChevronRight, BookOpen } from 'lucide-vue-next'
+import { Search, Star, ChevronRight, BookOpen, PlusCircle } from 'lucide-vue-next'
 import QuestionList from '../components/QuestionList.vue'
 
 const store = useAppStore()
@@ -11,6 +11,7 @@ const searchKeyword = ref('')
 const emit = defineEmits<{
   (e: 'selectCategory', categoryName: string): void
   (e: 'viewFavorites'): void
+  (e: 'addQuestions'): void
 }>()
 
 const categoryEmojis: Record<string, string> = {
@@ -51,6 +52,10 @@ function handleFavoritesClick() {
   emit('viewFavorites')
 }
 
+function handleAddQuestionsClick() {
+  emit('addQuestions')
+}
+
 const totalQuestionsCount = computed(() => {
   return store.overallProgress.totalQuestions
 })
@@ -89,23 +94,43 @@ const totalQuestionsCount = computed(() => {
           </button>
         </div>
 
-        <div class="flex gap-2">
+        <div class="flex flex-row gap-2">
           <button
+            type="button"
             @click="handleFavoritesClick"
-            class="w-full bg-app-muted hover:bg-app-surface border border-app rounded-2xl p-3 text-left flex items-center justify-between transition group cursor-pointer"
+            class="flex-1 min-w-0 bg-app-muted hover:bg-app-surface border border-app rounded-2xl p-3 text-left flex items-center justify-between transition group cursor-pointer"
           >
-            <div class="flex items-center gap-2.5">
-              <div class="bg-amber-500/10 text-amber-400 p-2 rounded-xl border border-amber-500/15 group-hover:scale-105 transition-transform">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="bg-amber-500/10 text-amber-400 p-2 rounded-xl border border-amber-500/15 group-hover:scale-105 transition-transform shrink-0">
                 <Star :size="14" fill="currentColor" />
               </div>
-              <div>
+              <div class="min-w-0">
                 <div class="text-xs font-bold text-app">我的收藏</div>
-                <div class="text-app-xs text-app-muted">
+                <div class="text-app-xs text-app-muted truncate">
                   共收藏 {{ store.favorites.length }} 道面试题
                 </div>
               </div>
             </div>
-            <ChevronRight :size="14" class="text-app-faint group-hover:text-app-secondary transition" />
+            <ChevronRight :size="14" class="text-app-faint group-hover:text-app-secondary transition shrink-0" />
+          </button>
+
+          <button
+            type="button"
+            @click="handleAddQuestionsClick"
+            class="flex-1 min-w-0 bg-app-muted hover:bg-app-surface border border-app rounded-2xl p-3 text-left flex items-center justify-between transition group cursor-pointer"
+          >
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="bg-app-accent-bg text-app-accent p-2 rounded-xl border border-app-accent group-hover:scale-105 transition-transform shrink-0">
+                <PlusCircle :size="14" :stroke-width="2" />
+              </div>
+              <div class="min-w-0">
+                <div class="text-xs font-bold text-app">添加题目</div>
+                <div class="text-app-xs text-app-muted truncate">
+                  自建题目并导出 Markdown
+                </div>
+              </div>
+            </div>
+            <ChevronRight :size="14" class="text-app-faint group-hover:text-app-secondary transition shrink-0" />
           </button>
         </div>
       </div>

@@ -4,23 +4,33 @@ import { useAppStore } from './store'
 import { Terminal, Database, Cpu, CheckCircle2, Info } from 'lucide-vue-next'
 import HomeView from './views/Home.vue'
 import CategoryView from './views/Category.vue'
+import AddQuestionsView from './views/AddQuestions.vue'
 import ThemeToggle from './components/ThemeToggle.vue'
 import TextScaleToggle from './components/TextScaleToggle.vue'
 
 const store = useAppStore()
 
-const currentCategoryName = ref<string | null>(null)
+type MainView =
+  | { kind: 'home' }
+  | { kind: 'add-questions' }
+  | { kind: 'category'; categoryName: string }
+
+const mainView = ref<MainView>({ kind: 'home' })
 
 function handleSelectCategory(catName: string) {
-  currentCategoryName.value = catName
+  mainView.value = { kind: 'category', categoryName: catName }
 }
 
 function handleViewFavorites() {
-  currentCategoryName.value = '我的收藏'
+  mainView.value = { kind: 'category', categoryName: '我的收藏' }
+}
+
+function handleAddQuestions() {
+  mainView.value = { kind: 'add-questions' }
 }
 
 function handleBackToHome() {
-  currentCategoryName.value = null
+  mainView.value = { kind: 'home' }
 }
 </script>
 
@@ -49,7 +59,7 @@ function handleBackToHome() {
 
     <!-- MOBILE: toggles on home (category page has its own toolbar) -->
     <div
-      v-if="currentCategoryName === null"
+      v-if="mainView.kind === 'home' || mainView.kind === 'add-questions'"
       class="md:hidden fixed top-3 right-3 z-50 flex items-center gap-2"
     >
       <TextScaleToggle />
@@ -87,14 +97,19 @@ function handleBackToHome() {
         <div class="app-main relative w-full h-[100dvh] md:h-full md:min-h-0 bg-app flex flex-col overflow-hidden">
           <div class="app-main-inner flex-1 flex flex-col p-4 pt-4 md:p-4 md:pt-4 lg:p-5 lg:pt-5 bg-app h-full overflow-hidden min-h-0">
             <KeepAlive>
-              <HomeView 
-                v-if="currentCategoryName === null"
-                @selectCategory="handleSelectCategory"
-                @viewFavorites="handleViewFavorites"
+              <HomeView
+                v-if="mainView.kind === 'home'"
+                @select-category="handleSelectCategory"
+                @view-favorites="handleViewFavorites"
+                @add-questions="handleAddQuestions"
               />
-              <CategoryView 
+              <AddQuestionsView
+                v-else-if="mainView.kind === 'add-questions'"
+                @back="handleBackToHome"
+              />
+              <CategoryView
                 v-else
-                :categoryName="currentCategoryName"
+                :category-name="mainView.categoryName"
                 @back="handleBackToHome"
               />
             </KeepAlive>
