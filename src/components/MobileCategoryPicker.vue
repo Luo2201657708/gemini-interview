@@ -72,7 +72,8 @@ function pick(i: number) {
   const opt = props.options[i]
   if (opt === undefined) return
   emit('update:modelValue', opt)
-  scrollToIndex(i, 'smooth')
+  /** Tap: snap instantly; swipe scrolling keeps native snap momentum without smooth scroll-to */
+  scrollToIndex(i, 'auto')
 }
 
 watch(
