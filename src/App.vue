@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useAppStore } from './store'
-import { Terminal, Database, Cpu, Heart, CheckCircle2 } from 'lucide-vue-next'
+import { Terminal, Database, Cpu, CheckCircle2, Info } from 'lucide-vue-next'
 import HomeView from './views/Home.vue'
 import CategoryView from './views/Category.vue'
 import ThemeToggle from './components/ThemeToggle.vue'
@@ -22,29 +22,6 @@ function handleViewFavorites() {
 function handleBackToHome() {
   currentCategoryName.value = null
 }
-
-const activeComponentStack = computed(() => {
-  if (currentCategoryName.value === null) {
-    return [
-      { name: 'Home.vue', active: true },
-      { name: '- QuestionList.vue (Search)', active: false },
-      { name: 'store/index.ts', active: true }
-    ]
-  } else if (currentCategoryName.value === '我的收藏') {
-    return [
-      { name: 'Category.vue (Favorites)', active: true },
-      { name: '- Flashcard.vue / QuestionList.vue', active: true },
-      { name: 'store/index.ts', active: true }
-    ]
-  } else {
-    return [
-      { name: `Category.vue (${currentCategoryName.value})`, active: true },
-      { name: '- QuestionList.vue', active: true },
-      { name: '- Flashcard.vue', active: true },
-      { name: 'store/index.ts', active: true }
-    ]
-  }
-})
 </script>
 
 <template>
@@ -65,13 +42,6 @@ const activeComponentStack = computed(() => {
       </div>
 
       <div class="flex items-center gap-3">
-        <div class="bg-app-surface border border-app rounded-full px-4 py-1 flex items-center gap-3">
-          <span class="text-[10px] font-bold text-app-muted uppercase tracking-widest">Database Sizing</span>
-          <div class="h-1.5 w-16 bg-app-inset rounded-full overflow-hidden">
-            <div class="w-[68%] h-full bg-app-accent-solid"></div>
-          </div>
-          <span class="text-[10px] font-mono font-bold text-app-secondary">14.8 KB</span>
-        </div>
         <TextScaleToggle />
         <ThemeToggle />
       </div>
@@ -160,25 +130,22 @@ const activeComponentStack = computed(() => {
           </div>
         </div>
 
-        <div class="bg-app-panel rounded-2xl border border-app p-4.5">
-          <div class="flex items-center gap-1.5 text-app-secondary text-xs font-bold mb-3">
-            <Cpu :size="13" />
-            <span class="uppercase tracking-widest">Component Tree</span>
+        <div
+          class="bg-app-panel rounded-2xl border border-app-accent p-3.5 shadow-[inset_0_1px_0_rgb(255_255_255_/_0.04)] grid grid-cols-[auto_1fr] gap-x-2.5 gap-y-1.5 items-start"
+        >
+          <div
+            class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-app-accent-bg text-app-accent row-start-1"
+          >
+            <Info :size="15" :stroke-width="2" />
           </div>
-          <div class="space-y-1.5 font-mono text-[10px]">
-            <div 
-              v-for="comp in activeComponentStack" 
-              :key="comp.name"
-              class="px-2 py-1.5 rounded transition"
-              :class="[
-                comp.active 
-                  ? 'bg-app-inset border border-app text-app-accent' 
-                  : 'text-app-faint'
-              ]"
-            >
-              {{ comp.name }}
-            </div>
-          </div>
+          <p class="text-app-xs font-bold text-app-heading tracking-tight leading-tight min-w-0 pt-1">
+            数据说明
+          </p>
+          <p
+            class="col-span-2 text-app-xs leading-[1.65] text-app-secondary antialiased [text-wrap:pretty]"
+          >
+            本站题目与解析均为个人整理，仅供参考，不保证完全准确，疏漏在所难免。若你发现错漏，或有好的题目与解析愿意分享，欢迎纠错与补充，非常感谢。
+          </p>
         </div>
 
         <div class="bg-green-500/10 p-3 rounded-2xl border border-green-500/15 flex gap-2.5 items-start">
@@ -189,16 +156,6 @@ const activeComponentStack = computed(() => {
         </div>
       </div>
 
-    </div>
-
-    <div class="hidden md:flex w-full bg-app border-t border-app-subtle py-2.5 px-6 shrink-0 justify-between items-center text-[10px] text-app-faint font-mono">
-      <div>DESIGN: THEME_AWARE_V1</div>
-      <div>VIEWPORT: RESPONSIVE (MOBILE / TABLET / DESKTOP)</div>
-      <div class="flex items-center gap-1">
-        <span>Made with</span>
-        <Heart class="text-rose-500 hover:scale-110 transition-transform" :size="9" fill="currentColor" />
-        <span>for Interview Success</span>
-      </div>
     </div>
 
   </div>
