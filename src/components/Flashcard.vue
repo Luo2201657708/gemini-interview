@@ -1,13 +1,28 @@
 <script setup lang="ts">
 import { ref, watch, computed, onMounted, onUnmounted } from 'vue'
 import { useAppStore, Question } from '../store'
-import { Star, Check, ChevronLeft, ChevronRight, RotateCw } from 'lucide-vue-next'
+import {
+  Star,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  RotateCw,
+  Maximize2,
+  Minimize2,
+} from 'lucide-vue-next'
 import QuestionFeedback from './QuestionFeedback.vue'
 
 const props = defineProps<{
   questions: Question[]
   categoryName: string
 }>()
+
+/** Immersive flashcard: parent hides category chrome; toggled via corner control (tap), not long-press. */
+const immersive = defineModel<boolean>('immersive', { default: false })
+
+function toggleImmersive() {
+  immersive.value = !immersive.value
+}
 
 const store = useAppStore()
 const currentIndex = ref(0)
@@ -288,7 +303,19 @@ function getLevelBadgeClass(level: string) {
 </script>
 
 <template>
-  <div class="flex flex-col h-full min-h-0 justify-between gap-2 sm:gap-3 md:gap-3">
+  <div class="relative flex flex-col h-full min-h-0 justify-between gap-2 sm:gap-3 md:gap-3">
+    <!-- Corner toggle: unobtrusive on mobile; click.stop avoids flip / swipe conflicts -->
+    <button
+      v-if="currentQuestion && questions.length > 0"
+      type="button"
+      class="absolute z-[45] flex size-9 items-center justify-center rounded-full border border-app bg-app-surface/95 text-app-secondary shadow-md backdrop-blur-sm transition hover:border-app-strong hover:text-app-heading pointer-events-auto left-auto max-[767px]:top-[max(0.25rem,env(safe-area-inset-top,0px))] max-[767px]:right-[max(0.25rem,env(safe-area-inset-right,0px))] md:right-0 md:top-0"
+      :aria-pressed="immersive"
+      :title="immersive ? '退出沉浸式' : '沉浸式闪卡'"
+      @click.stop="toggleImmersive"
+    >
+      <Minimize2 v-if="immersive" :size="16" aria-hidden="true" />
+      <Maximize2 v-else :size="16" aria-hidden="true" />
+    </button>
     <div v-if="currentQuestion" class="flashcard-stage flex-1 min-h-0 w-full flex flex-col items-center justify-center md:justify-stretch px-0.5 py-1 md:py-1 overflow-hidden">
       <div
         class="flashcard-card perspective-1000 cursor-pointer select-none touch-pan-y"
@@ -352,7 +379,7 @@ function getLevelBadgeClass(level: string) {
             </div>
 
             <div class="flex-1 min-h-0 my-2 sm:my-3 overflow-y-auto px-1 custom-scrollbar flex flex-col items-center justify-center" @click.stop>
-              <p class="text-app-secondary text-app-xs sm:text-xs leading-relaxed whitespace-pre-line antialiased w-full text-center">
+              <p class="text-app-secondary text-sm sm:text-base font-medium leading-relaxed whitespace-pre-line antialiased w-full text-center">
                 {{ currentQuestion.answer || '暂无详细文字回答，可以开启手风琴模式下的 AI 解析模块获得详细解说！' }}
               </p>
             </div>

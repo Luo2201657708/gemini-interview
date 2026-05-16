@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useAppStore } from './store'
 import { Terminal, Database, Cpu, CheckCircle2, Info } from 'lucide-vue-next'
 import HomeView from './views/Home.vue'
@@ -16,6 +16,16 @@ type MainView =
   | { kind: 'category'; categoryName: string }
 
 const mainView = ref<MainView>({ kind: 'home' })
+/** Desktop/tablet header hidden while category flashcard is in immersive mode */
+const categoryFlashcardImmersive = ref(false)
+
+watch(mainView, () => {
+  categoryFlashcardImmersive.value = false
+})
+
+function handleCategoryFlashcardImmersive(value: boolean) {
+  categoryFlashcardImmersive.value = value
+}
 
 function handleSelectCategory(catName: string) {
   mainView.value = { kind: 'category', categoryName: catName }
@@ -38,7 +48,14 @@ function handleBackToHome() {
   <div class="h-screen w-screen bg-app text-app font-sans flex flex-col overflow-hidden">
     
     <!-- TABLET / DESKTOP HEADER -->
-    <div class="hidden md:flex w-full bg-app border-b border-app-subtle py-3.5 px-6 shrink-0 justify-between items-center">
+    <div
+      class="hidden md:flex w-full shrink-0 justify-between items-center overflow-hidden bg-app transition-[max-height,opacity,padding,border-width] duration-[520ms] ease-[cubic-bezier(0.33,1,0.68,1)]"
+      :class="
+        categoryFlashcardImmersive
+          ? 'max-h-0 border-b-0 opacity-0 py-0 pointer-events-none'
+          : 'max-h-[5.5rem] border-b border-app-subtle opacity-100 py-3.5 px-6'
+      "
+    >
       <div class="flex items-center gap-2.5">
         <div class="bg-app-accent-solid text-white p-2 rounded-xl scale-95 flex items-center justify-center">
           <Terminal :size="16" />
@@ -95,7 +112,14 @@ function handleBackToHome() {
 
       <div class="flex-1 w-full min-w-0 flex items-stretch overflow-hidden h-full min-h-0">
         <div class="app-main relative w-full h-[100dvh] md:h-full md:min-h-0 bg-app flex flex-col overflow-hidden">
-          <div class="app-main-inner flex-1 flex flex-col p-4 pt-4 md:p-4 md:pt-4 lg:p-5 lg:pt-5 bg-app h-full overflow-hidden min-h-0">
+          <div
+            class="app-main-inner flex-1 flex flex-col bg-app h-full overflow-hidden min-h-0 transition-[padding] duration-[520ms] ease-[cubic-bezier(0.33,1,0.68,1)] p-4 md:p-4 lg:p-5"
+            :class="
+              categoryFlashcardImmersive
+                ? 'pt-2 md:pt-2 lg:pt-3'
+                : 'pt-4 md:pt-4 lg:pt-5'
+            "
+          >
             <KeepAlive>
               <HomeView
                 v-if="mainView.kind === 'home'"
@@ -111,6 +135,7 @@ function handleBackToHome() {
                 v-else
                 :category-name="mainView.categoryName"
                 @back="handleBackToHome"
+                @flashcard-immersive="handleCategoryFlashcardImmersive"
               />
             </KeepAlive>
           </div>
