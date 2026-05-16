@@ -152,7 +152,7 @@ async function copyPayload(kind: 'json' | 'md') {
     <Teleport to="body">
       <div
         v-show="open"
-        class="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-3 sm:p-6"
+        class="fixed inset-0 z-[200] flex items-center justify-center px-3 pt-[max(0.75rem,env(safe-area-inset-top,0px))] pb-[max(0.75rem,env(safe-area-inset-bottom,0px))] sm:px-6 sm:pt-[max(1.5rem,env(safe-area-inset-top,0px))] sm:pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="feedback-dialog-title"
@@ -163,7 +163,7 @@ async function copyPayload(kind: 'json' | 'md') {
           @click="open = false"
         />
         <div
-          class="relative w-full max-w-lg max-h-[90vh] overflow-hidden flex flex-col rounded-2xl border border-app bg-app-surface shadow-2xl text-app"
+          class="relative w-full max-w-lg min-h-0 max-h-[calc(100dvh-max(0.75rem,env(safe-area-inset-top,0px))-max(0.75rem,env(safe-area-inset-bottom,0px)))] sm:max-h-[calc(100dvh-max(1.5rem,env(safe-area-inset-top,0px))-max(1.5rem,env(safe-area-inset-bottom,0px)))] overflow-hidden flex flex-col rounded-2xl border border-app bg-app-surface shadow-2xl text-app"
           @click.stop
         >
           <div class="flex items-center justify-between gap-3 px-4 py-3 border-b border-app shrink-0">
