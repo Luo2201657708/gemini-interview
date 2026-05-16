@@ -154,11 +154,11 @@ function downloadMd() {
 <template>
   <div class="flex-1 flex flex-col min-h-0 overflow-hidden">
     <div
-      class="shrink-0 border-b border-app-subtle mb-3 pb-3 flex items-start gap-2 max-md:pr-[10.75rem] md:pr-0"
+      class="shrink-0 border-b border-app-subtle mb-3 pb-3 flex items-center gap-2 max-md:pr-[10.75rem] md:pr-0"
     >
       <button
         type="button"
-        class="shrink-0 mt-0.5 w-8 h-8 rounded-full bg-app-surface border border-app flex items-center justify-center text-app-secondary hover:text-app-heading transition-colors cursor-pointer"
+        class="shrink-0 w-8 h-8 rounded-full bg-app-surface border border-app flex items-center justify-center text-app-secondary hover:text-app-heading transition-colors cursor-pointer"
         aria-label="返回首页"
         @click="emit('back')"
       >
@@ -166,11 +166,6 @@ function downloadMd() {
       </button>
       <div class="min-w-0 flex-1 pr-1">
         <h2 class="text-sm font-bold text-app-heading tracking-tight truncate">添加题目</h2>
-        <p
-          class="text-app-2xs text-app-muted mt-0.5 leading-relaxed max-w-full [text-wrap:pretty] break-words"
-        >
-          必填：分类、出题人、题目、答案、掌握程度（横向滑动或点选）。可追加多题后导出 Markdown。
-        </p>
       </div>
     </div>
 
