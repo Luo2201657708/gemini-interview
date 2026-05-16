@@ -7,26 +7,26 @@
 }
 
 [data-text-scale="compact"] {
-  --app-scale: 0.86;
+  --app-scale: 0.9;
 }
 
 [data-text-scale="comfortable"],
 [data-text-scale="large"],
 [data-text-scale="xlarge"] {
-  --app-scale: 1.06;
+  --app-scale: 1.05;
 }
 
 @media (min-width: 768px) {
   [data-text-scale="comfortable"] {
-    --app-scale: 1.1;
+    --app-scale: 1.08;
   }
 
   [data-text-scale="large"] {
-    --app-scale: 1.22;
+    --app-scale: 1.11;
   }
 
   [data-text-scale="xlarge"] {
-    --app-scale: 1.36;
+    --app-scale: 1.15;
   }
 }
 
@@ -254,7 +254,7 @@ html {
 /* Align with Tailwind md/lg/xl (768 / 1024 / 1280). Tablet (md, below lg): more width, flatter ratio, viewport-capped height. */
 @media (min-width: 768px) {
   .flashcard-stage {
-    align-items: stretch;
+    align-items: center;
   }
 }
 

@@ -203,7 +203,7 @@ const viewProgress = computed(() => {
             </button>
           </div>
 
-          <div class="flex items-center gap-2 shrink-0">
+          <div class="flex items-center gap-2 shrink-0 md:hidden">
             <TextScaleToggle />
             <ThemeToggle />
           </div>
@@ -301,7 +301,7 @@ const viewProgress = computed(() => {
 
 .chrome-collapse-shell {
   overflow: hidden;
-  max-height: calc(7.5rem * var(--app-scale));
+  max-height: 7.5rem;
   margin-bottom: 1rem;
   opacity: 1;
   pointer-events: auto;

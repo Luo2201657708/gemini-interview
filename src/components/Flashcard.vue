@@ -304,19 +304,7 @@ function getLevelBadgeClass(level: string) {
 
 <template>
   <div class="relative flex flex-col h-full min-h-0 justify-between gap-2 sm:gap-3 md:gap-3">
-    <!-- Corner toggle: unobtrusive on mobile; click.stop avoids flip / swipe conflicts -->
-    <button
-      v-if="currentQuestion && questions.length > 0"
-      type="button"
-      class="absolute z-[45] flex size-9 items-center justify-center rounded-full border border-app bg-app-surface/95 text-app-secondary shadow-md backdrop-blur-sm transition hover:border-app-strong hover:text-app-heading pointer-events-auto left-auto max-[767px]:top-[max(0.25rem,env(safe-area-inset-top,0px))] max-[767px]:right-[max(0.25rem,env(safe-area-inset-right,0px))] md:right-0 md:top-0"
-      :aria-pressed="immersive"
-      :title="immersive ? '退出沉浸式' : '沉浸式闪卡'"
-      @click.stop="toggleImmersive"
-    >
-      <Minimize2 v-if="immersive" :size="16" aria-hidden="true" />
-      <Maximize2 v-else :size="16" aria-hidden="true" />
-    </button>
-    <div v-if="currentQuestion" class="flashcard-stage flex-1 min-h-0 w-full flex flex-col items-center justify-center md:justify-stretch px-0.5 py-1 md:py-1 overflow-hidden">
+    <div v-if="currentQuestion" class="flashcard-stage flex-1 min-h-0 w-full flex flex-col items-center justify-center px-0.5 py-1 md:py-1 overflow-hidden">
       <div
         class="flashcard-card perspective-1000 cursor-pointer select-none touch-pan-y"
         :class="cardMotionClass"
@@ -331,60 +319,86 @@ function getLevelBadgeClass(level: string) {
           :class="{ 'rotate-y-180': isFlipped }"
         >
           <div class="absolute inset-0 w-full h-full backface-hidden bg-app-card-front rounded-3xl border border-app p-4 sm:p-6 flex flex-col items-center text-center shadow-xl justify-between">
-            <div class="flex justify-between items-center w-full gap-2">
-              <span class="text-app-xs font-mono text-app-muted uppercase tracking-widest">
-                Level Indicator
-              </span>
-              <span 
-                v-if="currentQuestion.level"
-                class="text-app-xs px-2.5 py-0.5 rounded-full font-bold border shrink-0" 
-                :class="getLevelBadgeClass(currentQuestion.level)"
+            <div class="flex w-full min-w-0 items-center justify-between gap-2">
+              <div class="flex min-w-0 flex-1 flex-wrap items-center justify-center gap-x-2 gap-y-1 md:justify-start">
+                <span class="text-app-xs md:text-xs font-mono text-app-muted uppercase tracking-widest">
+                  Level Indicator
+                </span>
+                <span 
+                  v-if="currentQuestion.level"
+                  class="text-app-xs md:text-xs px-2.5 py-0.5 rounded-full font-bold border shrink-0" 
+                  :class="getLevelBadgeClass(currentQuestion.level)"
+                >
+                  {{ currentQuestion.level }}
+                </span>
+              </div>
+              <button
+                v-if="questions.length > 0"
+                type="button"
+                class="flex size-9 shrink-0 items-center justify-center rounded-full border border-app bg-app-surface/95 text-app-secondary shadow-md backdrop-blur-sm transition hover:border-app-strong hover:text-app-heading pointer-events-auto"
+                :aria-pressed="immersive"
+                :title="immersive ? '退出沉浸式' : '沉浸式闪卡'"
+                @click.stop="toggleImmersive"
               >
-                {{ currentQuestion.level }}
-              </span>
+                <Minimize2 v-if="immersive" :size="16" aria-hidden="true" />
+                <Maximize2 v-else :size="16" aria-hidden="true" />
+              </button>
             </div>
 
             <div class="flex-1 flex flex-col justify-center py-4 w-full">
-              <h3 class="text-sm sm:text-base font-medium text-app leading-relaxed px-1 sm:px-2">
+              <h3 class="text-base sm:text-lg md:text-xl lg:text-2xl font-medium text-app leading-relaxed px-1 sm:px-2">
                 {{ currentQuestion.question }}
               </h3>
               
               <div 
                 v-if="store.isMastered(currentQuestion.id)"
-                class="mt-3 flex items-center justify-center gap-1 text-green-400 text-xs font-semibold"
+                class="mt-3 flex items-center justify-center gap-1 text-green-400 text-xs md:text-sm font-semibold"
               >
                 <Check :size="14" class="stroke-[3]" />
                 <span>已掌握此题</span>
               </div>
             </div>
 
-            <div class="text-app-muted text-app-xs flex items-center gap-1.5 py-1 shrink-0">
+            <div class="text-app-muted text-app-xs md:text-xs flex items-center gap-1.5 py-1 shrink-0">
               <RotateCw :size="10" />
               <span>点击卡片翻转查看解答</span>
             </div>
           </div>
 
           <div class="absolute inset-0 w-full h-full backface-hidden rotate-y-180 bg-app-card-back rounded-3xl border border-app-accent p-4 sm:p-5 flex flex-col shadow-2xl justify-between min-h-0">
-            <div class="flex justify-between items-center pb-2 border-b border-app w-full gap-2 shrink-0">
-              <span class="text-app-xs font-bold text-app-accent uppercase tracking-widest">
-                Answer Key
-              </span>
-              <span 
-                v-if="currentQuestion.level"
-                class="text-app-xs px-2 py-0.5 rounded-full border shrink-0" 
-                :class="getLevelBadgeClass(currentQuestion.level)"
+            <div class="flex w-full min-w-0 items-center justify-between gap-2 pb-2 border-b border-app shrink-0">
+              <div class="flex min-w-0 flex-1 flex-wrap items-center gap-x-2 gap-y-1">
+                <span class="text-app-xs md:text-xs font-bold text-app-accent uppercase tracking-widest">
+                  Answer Key
+                </span>
+                <span 
+                  v-if="currentQuestion.level"
+                  class="text-app-xs md:text-xs px-2 py-0.5 rounded-full border shrink-0" 
+                  :class="getLevelBadgeClass(currentQuestion.level)"
+                >
+                  {{ currentQuestion.level }}
+                </span>
+              </div>
+              <button
+                v-if="questions.length > 0"
+                type="button"
+                class="flex size-9 shrink-0 items-center justify-center rounded-full border border-app bg-app-surface/95 text-app-secondary shadow-md backdrop-blur-sm transition hover:border-app-strong hover:text-app-heading pointer-events-auto"
+                :aria-pressed="immersive"
+                :title="immersive ? '退出沉浸式' : '沉浸式闪卡'"
+                @click.stop="toggleImmersive"
               >
-                {{ currentQuestion.level }}
-              </span>
+                <Minimize2 v-if="immersive" :size="16" aria-hidden="true" />
+                <Maximize2 v-else :size="16" aria-hidden="true" />
+              </button>
             </div>
 
             <div class="flex-1 min-h-0 my-2 sm:my-3 overflow-y-auto px-1 custom-scrollbar flex flex-col items-center justify-center" @click.stop>
-              <p class="text-app-secondary text-sm sm:text-base font-medium leading-relaxed whitespace-pre-line antialiased w-full text-center">
+              <p class="text-app-secondary text-base sm:text-lg md:text-xl lg:text-2xl font-medium leading-relaxed whitespace-pre-line antialiased w-full text-center">
                 {{ currentQuestion.answer || '暂无详细文字回答，可以开启手风琴模式下的 AI 解析模块获得详细解说！' }}
               </p>
             </div>
 
-            <div class="text-app-muted text-app-2xs text-center pointer-events-none mt-1 py-1 border-t border-app flex items-center justify-center gap-1 shrink-0">
+            <div class="text-app-muted text-app-2xs md:text-app-xs text-center pointer-events-none mt-1 py-1 border-t border-app flex items-center justify-center gap-1 shrink-0">
               <RotateCw :size="9" />
               <span>点击空白处可翻回正面</span>
             </div>
